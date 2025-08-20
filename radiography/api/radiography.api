@@ -64,14 +64,16 @@ public final class radiography/ScannableView$ChildRenderingError : radiography/S
 }
 
 public final class radiography/ScannableView$ComposeView : radiography/ScannableView {
-	public fun <init> (Ljava/lang/String;Ljava/util/List;IILjava/util/List;Ljava/util/List;Lkotlin/sequences/Sequence;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/List;IIIILjava/util/List;Ljava/util/List;Lkotlin/sequences/Sequence;)V
 	public final fun getCallChain ()Ljava/util/List;
 	public fun getChildren ()Lkotlin/sequences/Sequence;
 	public fun getDisplayName ()Ljava/lang/String;
 	public final fun getHeight ()I
+	public final fun getLeft ()I
 	public final fun getModifiers ()Ljava/util/List;
 	public final fun getSemanticsConfigurations ()Ljava/util/List;
 	public final fun getSemanticsNodes ()Ljava/util/List;
+	public final fun getTop ()I
 	public final fun getWidth ()I
 	public fun toString ()Ljava/lang/String;
 }

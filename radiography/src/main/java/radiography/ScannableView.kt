@@ -61,6 +61,8 @@ public sealed class ScannableView {
     public val callChain: List<CallGroupInfo>,
     public val width: Int,
     public val height: Int,
+    public val top: Int,
+    public val left: Int,
     public val modifiers: List<Modifier>,
     public val semanticsNodes: List<SemanticsNode>,
     override val children: Sequence<ScannableView>,
@@ -141,6 +143,8 @@ internal fun ComposeLayoutInfo.toScannableView(): ScannableView = when (val layo
     // Can't use width and height properties because we're not targeting 1.8 bytecode.
     width = layoutInfo.bounds.run { right - left },
     height = layoutInfo.bounds.run { bottom - top },
+    top = layoutInfo.bounds.top,
+    left = layoutInfo.bounds.left,
     modifiers = layoutInfo.modifiers,
     semanticsNodes = layoutInfo.semanticsNodes,
     children = layoutInfo.children.map(ComposeLayoutInfo::toScannableView)
@@ -151,6 +155,8 @@ internal fun ComposeLayoutInfo.toScannableView(): ScannableView = when (val layo
     callChain = layoutInfo.callChain,
     width = layoutInfo.bounds.run { right - left },
     height = layoutInfo.bounds.run { bottom - top },
+    top = layoutInfo.bounds.top,
+    left = layoutInfo.bounds.left,
     modifiers = emptyList(),
     semanticsNodes = emptyList(),
     children = layoutInfo.children.map(ComposeLayoutInfo::toScannableView),
