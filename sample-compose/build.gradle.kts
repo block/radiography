@@ -53,6 +53,7 @@ tasks.withType<KotlinCompile> {
 
 dependencies {
   implementation(project(":radiography"))
+  implementation(project(":slot-table-inspector"))
   implementation(Dependencies.AppCompat)
   implementation(Dependencies.Compose(sampleComposeVersion).Activity())
   implementation(Dependencies.Compose(sampleComposeVersion).Material)

@@ -20,5 +20,6 @@ include(
   ":compose-unsupported-tests",
   ":radiography",
   ":sample",
-  ":sample-compose"
+  ":sample-compose",
+  ":slot-table-inspector",
 )
