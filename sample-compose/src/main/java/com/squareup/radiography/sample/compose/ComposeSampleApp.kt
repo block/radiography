@@ -7,7 +7,6 @@ import android.util.Log
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog.Builder
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,7 +24,9 @@ import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Recomposer
+import androidx.compose.runtime.Recomposer.State.Idle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +42,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.withContext
 import radiography.ExperimentalRadiographyComposeApi
 import radiography.Radiography
 import radiography.ScanScopes.FocusedWindowScope
@@ -61,7 +76,6 @@ internal const val LIVE_HIERARCHY_TEST_TAG = "live-hierarchy"
   ComposeSampleApp()
 }
 
-@OptIn(ExperimentalRadiographyComposeApi::class, ExperimentalAnimationApi::class)
 @Composable fun ComposeSampleApp() {
   val context = LocalContext.current
   val liveHierarchy = remember { mutableStateOf<String?>(null) }
@@ -134,12 +148,8 @@ internal const val LIVE_HIERARCHY_TEST_TAG = "live-hierarchy"
         Text("SHOW STRING RENDERING DIALOG")
       }
 
-      SideEffect {
-        liveHierarchy.value = Radiography.scan(
-          viewStateRenderers = DefaultsIncludingPii,
-          // Don't trigger infinite recursion.
-          viewFilter = skipComposeTestTagsFilter(LIVE_HIERARCHY_TEST_TAG)
-        )
+      LaunchedEffect(Unit) {
+        runLiveScanning { liveHierarchy.value = it }
       }
     }
   }
@@ -213,4 +223,52 @@ private fun showResult(
   val messageView = renderingDialog.findViewById<TextView>(android.R.id.message)!!
   messageView.textSize = 9f
   messageView.typeface = Typeface.MONOSPACE
+}
+
+@OptIn(
+  ExperimentalCoroutinesApi::class,
+  FlowPreview::class,
+  ExperimentalRadiographyComposeApi::class
+)
+private suspend fun runLiveScanning(onScanResult: (String) -> Unit) {
+  // A Flow that emits false when all Recomposers are idle, and true when at least one Recomposer
+  // is non-idle.
+  val isComposing: Flow<Boolean> = Recomposer.runningRecomposers
+    .flatMapLatest { recomposers ->
+      combine(recomposers.map { it.state }) { states ->
+        states.any { it != Idle }
+      }
+    }
+    .distinctUntilChanged()
+
+  fun emitEvery(periodMs: Long): Flow<Unit> = flow {
+    while (true) {
+      emit(Unit)
+      delay(periodMs)
+    }
+  }
+
+  @Suppress("NAME_SHADOWING")
+  val scanTrigger = isComposing.flatMapLatest { isComposing ->
+    if (isComposing) {
+      // While any Recomposer's state is not idle, do a scan every 500 millis. This effectively
+      // throttles scans during continuously-recomposing periods like animations.
+      emitEvery(500)
+    } else {
+      // Emit once to scan the now-settled composition, then stop.
+      flowOf(Unit)
+    }
+  }
+
+  // If a scan takes too long and other scan requests were fired in the meantime, coalesce them.
+  scanTrigger.buffer(1, DROP_OLDEST)
+    .collect {
+      withContext(Dispatchers.Default) {
+        Radiography.scan(
+          viewStateRenderers = DefaultsIncludingPii,
+          // Don't trigger infinite recursion.
+          viewFilter = skipComposeTestTagsFilter(LIVE_HIERARCHY_TEST_TAG)
+        ).let(onScanResult)
+      }
+    }
 }
