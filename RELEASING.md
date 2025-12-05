@@ -27,6 +27,7 @@ git commit -am "Prepare {NEW_VERSION} release" && \
 ./gradlew clean && \
 ./gradlew build && \
 ./gradlew connectedCheck && \
+// See stoic-plugin/README.md.
 ./gradlew :stoic-plugin:dist && \
 git tag v{NEW_VERSION} && \
 git push origin v{NEW_VERSION} && \
