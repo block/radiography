@@ -1,0 +1,151 @@
+#!/usr/bin/env bash
+#
+# Radiography - View Hierarchy Scanner for Android
+# A wrapper script for the Radiography Stoic plugin
+#
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PLUGIN_APK="${SCRIPT_DIR}/stoic-plugin-debug.apk"
+
+# Check if stoic is installed
+if ! command -v stoic &> /dev/null; then
+    echo "Error: 'stoic' command not found. Please install Stoic first." >&2
+    echo "See: https://github.com/block/stoic" >&2
+    exit 1
+fi
+
+# Check if plugin APK exists
+if [[ ! -f "${PLUGIN_APK}" ]]; then
+    echo "Error: Plugin APK not found at ${PLUGIN_APK}" >&2
+    exit 1
+fi
+
+# Function to display usage
+usage() {
+    cat << EOF
+Usage: radiography [OPTIONS] [PACKAGE]
+
+Scan and print the view hierarchy of a running Android application using Radiography.
+
+Arguments:
+  PACKAGE       Optional. The package name of the app to inspect.
+                Can be specified as a positional argument or via --pkg/--package/-n.
+                If not specified, Stoic will try to detect the foreground app.
+
+Options:
+  --pii                Include PII (personally identifiable information) like text content
+  --focused            Scan only the focused window instead of all windows
+  --pkg PACKAGE        Specify the package name to inspect (same as -n, --package)
+  --package PACKAGE    Specify the package name to inspect (same as -n, --pkg)
+  -n PACKAGE           Specify the package name to inspect (same as --pkg, --package)
+  -h, --help           Display this help message
+
+Device Selection (passed through to adb):
+  -s SERIAL            Use device with given serial number
+  -d                   Use USB device
+  -e                   Use emulator
+
+Examples:
+  # Scan the foreground app
+  radiography
+
+  # Scan a specific app
+  radiography com.example.myapp
+
+  # Scan with PII included
+  radiography --pii com.example.myapp
+
+  # Scan only focused window
+  radiography --focused com.example.myapp
+
+  # Scan on specific device
+  radiography -s emulator-5554 com.example.myapp
+
+  # Use emulator
+  radiography -e com.example.myapp
+
+  # Combine options
+  radiography --pii --focused -s emulator-5554 com.example.myapp
+
+For more information about Stoic, see: https://github.com/block/stoic
+For more information about Radiography, see: https://github.com/square/radiography
+EOF
+}
+
+# Parse arguments
+PLUGIN_ARGS=()
+STOIC_ARGS=()
+PACKAGE=""
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        --pii|--focused)
+            # Plugin arguments
+            PLUGIN_ARGS+=("$1")
+            shift
+            ;;
+        --pkg|--package|-n)
+            # Package name arguments (passed through to stoic)
+            if [[ $# -lt 2 ]]; then
+                echo "Error: $1 requires a package name" >&2
+                exit 1
+            fi
+            if [[ -n "${PACKAGE}" ]]; then
+                echo "Error: Package already specified as '${PACKAGE}'" >&2
+                exit 1
+            fi
+            PACKAGE_FLAG="$1"
+            shift
+            PACKAGE="$1"
+            shift
+            ;;
+        -s|-d|-e)
+            # ADB device selection arguments (passed through to stoic/adb)
+            STOIC_ARGS+=("$1")
+            if [[ "$1" == "-s" ]]; then
+                if [[ $# -lt 2 ]]; then
+                    echo "Error: -s requires a device serial number" >&2
+                    exit 1
+                fi
+                shift
+                STOIC_ARGS+=("$1")
+            fi
+            shift
+            ;;
+        -*)
+            echo "Error: Unknown option: $1" >&2
+            echo "Run 'radiography --help' for usage information." >&2
+            exit 1
+            ;;
+        *)
+            # Assume it's the package name (positional argument)
+            if [[ -n "${PACKAGE}" ]]; then
+                echo "Error: Package already specified as '${PACKAGE}'" >&2
+                exit 1
+            fi
+            PACKAGE="$1"
+            PACKAGE_FLAG="--pkg"  # Default to --pkg when using positional argument
+            shift
+            ;;
+    esac
+done
+
+# Build the stoic command
+STOIC_CMD=(stoic "${STOIC_ARGS[@]}")
+
+# Add package name if specified (preserve the flag the user used, or use --pkg as default)
+if [[ -n "${PACKAGE}" ]]; then
+    STOIC_CMD+=("${PACKAGE_FLAG}" "${PACKAGE}")
+fi
+
+# Add the plugin APK and its arguments
+STOIC_CMD+=("${PLUGIN_APK}" "${PLUGIN_ARGS[@]}")
+
+# Execute stoic
+exec "${STOIC_CMD[@]}"
