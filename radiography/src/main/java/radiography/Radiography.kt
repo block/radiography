@@ -1,16 +1,16 @@
 package radiography
 
-import android.os.Handler
-import android.os.Looper
 import android.view.View
 import android.view.WindowManager
 import androidx.annotation.VisibleForTesting
 import radiography.Radiography.scan
+import radiography.ScanExecutors.HandlerPostingExecutor
+import radiography.ScanExecutors.NeverThrowingExecutor
+import radiography.ScanExecutors.mainHandler
 import radiography.ScanScopes.AllWindowsScope
 import radiography.ScannableView.AndroidView
 import radiography.ViewStateRenderers.DefaultsNoPii
 import radiography.internal.renderTreeString
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit.SECONDS
 
 /**
@@ -42,37 +42,24 @@ public object Radiography {
   public fun scan(
     scanScope: ScanScope = AllWindowsScope,
     viewStateRenderers: List<ViewStateRenderer> = DefaultsNoPii,
-    viewFilter: ViewFilter = ViewFilters.NoFilter
-  ): String = buildString {
-    val roots = try {
-      scanScope.findRoots()
-    } catch (e: Throwable) {
-      append("Exception when finding scan roots: ${e.message}")
-      return@buildString
-    }
-
-    roots.forEach { scanRoot ->
-      // The entire view tree is single threaded, and that's typically the main thread, but
-      // it doesn't have to be, and we don't know where the passed in view is coming from.
-      val viewLooper = (scanRoot as? AndroidView)?.view?.handler?.looper
-        ?: Looper.getMainLooper()!!
-
-      if (viewLooper.thread == Thread.currentThread()) {
-        scanFromLooperThread(scanRoot, viewStateRenderers, viewFilter)
-      } else {
-        val latch = CountDownLatch(1)
-        Handler(viewLooper).post {
-          scanFromLooperThread(scanRoot, viewStateRenderers, viewFilter)
-          latch.countDown()
-        }
-        if (!latch.await(5, SECONDS)) {
-          return "Could not retrieve view hierarchy from main thread after 5 seconds wait"
-        }
+    viewFilter: ViewFilter = ViewFilters.NoFilter,
+    scanExecutor: ScanExecutor = NeverThrowingExecutor(
+      HandlerPostingExecutor(
+        mainHandler,
+        5,
+        SECONDS
+      )
+    )
+  ): String = scanExecutor.execute {
+    buildString {
+      val roots = scanScope.findRoots()
+      roots.forEach { scanRoot ->
+        scanRoot(scanRoot, viewStateRenderers, viewFilter)
       }
     }
   }
 
-  private fun StringBuilder.scanFromLooperThread(
+  private fun StringBuilder.scanRoot(
     rootView: ScannableView,
     viewStateRenderers: List<ViewStateRenderer>,
     viewFilter: ViewFilter

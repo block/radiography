@@ -12,7 +12,20 @@ public final class radiography/Radiography {
 	public static final fun scan (Lradiography/ScanScope;)Ljava/lang/String;
 	public static final fun scan (Lradiography/ScanScope;Ljava/util/List;)Ljava/lang/String;
 	public static final fun scan (Lradiography/ScanScope;Ljava/util/List;Lradiography/ViewFilter;)Ljava/lang/String;
-	public static synthetic fun scan$default (Lradiography/ScanScope;Ljava/util/List;Lradiography/ViewFilter;ILjava/lang/Object;)Ljava/lang/String;
+	public static final fun scan (Lradiography/ScanScope;Ljava/util/List;Lradiography/ViewFilter;Lradiography/ScanExecutor;)Ljava/lang/String;
+	public static synthetic fun scan$default (Lradiography/ScanScope;Ljava/util/List;Lradiography/ViewFilter;Lradiography/ScanExecutor;ILjava/lang/Object;)Ljava/lang/String;
+}
+
+public abstract interface class radiography/ScanExecutor {
+	public abstract fun execute (Ljava/util/concurrent/Callable;)Ljava/lang/String;
+}
+
+public final class radiography/ScanExecutors {
+	public static final field INSTANCE Lradiography/ScanExecutors;
+	public static final field PassthroughExecutor Lradiography/ScanExecutor;
+	public static final fun HandlerPostingExecutor (Landroid/os/Handler;JLjava/util/concurrent/TimeUnit;)Lradiography/ScanExecutor;
+	public static final fun LooperEnforcingExecutor (Landroid/os/Looper;)Lradiography/ScanExecutor;
+	public static final fun NeverThrowingExecutor (Lradiography/ScanExecutor;)Lradiography/ScanExecutor;
 }
 
 public abstract interface class radiography/ScanScope {
