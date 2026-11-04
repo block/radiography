@@ -17,8 +17,7 @@ import com.ncorti.ktfmt.gradle.KtfmtExtension
 import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import kotlinx.validation.ApiValidationExtension
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidExtension
 
 println("Building with Kotlin compiler version ${libs.versions.kotlin.get()}")
 
@@ -106,14 +105,17 @@ subprojects {
     }
   }
 
-  tasks.withType<KotlinCompile> {
-    compilerOptions {
-      // Allow warnings when running from IDE, makes it easier to experiment.
-      if (!isRunningFromIde) {
-        allWarningsAsErrors.set(true)
+  // AGP's built-in Kotlin registers the `kotlin` extension for every Android module.
+  // jvmTarget is not set here: with built-in Kotlin it defaults to each module's
+  // android.compileOptions.targetCompatibility.
+  plugins.withId("com.android.base") {
+    configure<KotlinAndroidExtension> {
+      compilerOptions {
+        // Allow warnings when running from IDE, makes it easier to experiment.
+        if (!isRunningFromIde) {
+          allWarningsAsErrors.set(true)
+        }
       }
-
-      jvmTarget.set(JvmTarget.JVM_1_8)
     }
   }
 }

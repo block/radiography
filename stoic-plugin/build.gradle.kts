@@ -13,10 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-plugins {
-  id("com.android.application")
-  kotlin("android")
-}
+plugins { id("com.android.application") }
 
 android {
   namespace = "radiography.stoic"
@@ -38,7 +35,6 @@ android {
 
 dependencies {
   compileOnly("com.squareup.stoic:plugin-sdk:0.7.0")
-  implementation(kotlin("stdlib"))
   implementation(project(":radiography"))
 }
 

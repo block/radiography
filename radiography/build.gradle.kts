@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import kotlinx.validation.KotlinApiBuildTask
+import kotlinx.validation.KotlinApiCompareTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   id("com.android.library")
-  kotlin("android")
   id("com.vanniktech.maven.publish.base")
 }
 
@@ -44,24 +45,63 @@ android {
   testNamespace = "com.squareup.radiography.test"
 }
 
-tasks.withType<KotlinCompile> {
-  compilerOptions {
-    freeCompilerArgs.addAll(
-      listOfNotNull(
-        "-opt-in=kotlin.RequiresOptIn",
+kotlin {
+  // Require explicit public modifiers and types. AGP's built-in Kotlin only applies this to
+  // production sources; tests aren't part of the public API.
+  explicitApi()
 
-        // Require explicit public modifiers and types.
-        // TODO this should be moved to a top-level `kotlin { explicitApi() }` once that's working
-        //  for android projects, see https://youtrack.jetbrains.com/issue/KT-37652.
-        "-Xexplicit-api=strict"
-          .takeUnless {
-            // Tests aren't part of the public API, don't turn explicit API mode on for them.
-            name.contains("test", ignoreCase = true)
-          },
-      )
-    )
-  }
+  compilerOptions { freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn") }
 }
+
+// The binary-compatibility-validator plugin (applied in the root build script) only configures
+// Android modules when the standalone org.jetbrains.kotlin.android plugin is applied, which AGP's
+// built-in Kotlin support replaces. Until BCV (or KGP's own abiValidation) supports built-in
+// Kotlin, reproduce BCV's kotlin-android wiring here using its public task types: apiBuild dumps
+// the public API of the release compilation, apiCheck compares it with api/radiography.api, and
+// apiDump updates that file.
+val apiDir = layout.projectDirectory.dir("api")
+val apiFileName = "${project.name}.api"
+
+// BCV only adds kotlin-metadata-jvm to its worker classpath when it sees a Kotlin plugin id.
+dependencies.add(
+  "bcv-rt-jvm-cp",
+  "org.jetbrains.kotlin:kotlin-metadata-jvm:${libs.versions.kotlin.get()}",
+)
+
+val apiBuild =
+  tasks.register<KotlinApiBuildTask>("apiBuild") {
+    description = "Builds Kotlin API for the release compilation of ${project.name}."
+    // AGP's compilations don't populate output.classesDirs, so read the compile tasks' outputs.
+    inputClassesDirs.from(
+      tasks.named<KotlinCompile>("compileReleaseKotlin").flatMap { it.destinationDirectory },
+      tasks.named<JavaCompile>("compileReleaseJavaWithJavac").flatMap { it.destinationDirectory },
+    )
+    inputDependencies.from(
+      kotlin.target.compilations.named("release").map { it.compileDependencyFiles }
+    )
+    outputApiFile.set(layout.buildDirectory.file("api/$apiFileName"))
+    runtimeClasspath.from(configurations.named("bcv-rt-jvm-cp-resolver"))
+  }
+
+val apiCheck =
+  tasks.register<KotlinApiCompareTask>("apiCheck") {
+    group = "verification"
+    description =
+      "Checks signatures of public API against the golden value in API folder for ${project.name}"
+    projectApiFile.set(apiDir.file(apiFileName))
+    generatedApiFile.set(apiBuild.flatMap { it.outputApiFile })
+  }
+
+tasks.register("apiDump") {
+  description = "Syncs the API file for ${project.name}"
+  val from = apiBuild.flatMap { it.outputApiFile }
+  val to = apiDir.file(apiFileName)
+  inputs.file(from)
+  outputs.file(to)
+  doLast { from.get().asFile.copyTo(to.asFile, overwrite = true) }
+}
+
+tasks.named("check") { dependsOn(apiCheck) }
 
 dependencies {
   implementation(libs.curtains)

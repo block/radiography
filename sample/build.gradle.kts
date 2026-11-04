@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-plugins {
-  id("com.android.application")
-  kotlin("android")
-}
+plugins { id("com.android.application") }
 
 android {
   compileSdk = 35
