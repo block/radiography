@@ -10,10 +10,10 @@ import org.junit.Test
 
 class SampleSmokeTest {
 
-  @get:Rule
-  val activityRule = ActivityScenarioRule(MainActivity::class.java)
+  @get:Rule val activityRule = ActivityScenarioRule(MainActivity::class.java)
 
-  @Test fun displaysInitialScreen() {
+  @Test
+  fun displaysInitialScreen() {
     onView(withText("Remember me")).check(matches(isDisplayed()))
   }
 }

@@ -10,22 +10,18 @@ import radiography.internal.isComposeAvailable
 
 public object ScanScopes {
 
-  @JvmField
-  internal val EmptyScope: ScanScope = ScanScope { emptyList() }
+  @JvmField internal val EmptyScope: ScanScope = ScanScope { emptyList() }
 
   /** Scans all the windows owned by the app. */
   @JvmField
-  public val AllWindowsScope: ScanScope = ScanScope {
-    Curtains.rootViews
-      .map(::AndroidView)
-  }
+  public val AllWindowsScope: ScanScope = ScanScope { Curtains.rootViews.map(::AndroidView) }
 
   /** Scans the window that currently has focus. */
   @JvmField
   public val FocusedWindowScope: ScanScope = ScanScope {
-    AllWindowsScope.findRoots()
-      .filterIsInstance<AndroidView>()
-      .filter { it.view.parent?.parent != null || it.view.hasWindowFocus() }
+    AllWindowsScope.findRoots().filterIsInstance<AndroidView>().filter {
+      it.view.parent?.parent != null || it.view.hasWindowFocus()
+    }
   }
 
   /** Scans the given [rootView]. */
@@ -59,10 +55,7 @@ public object ScanScopes {
   @ExperimentalRadiographyComposeApi
   @JvmStatic
   @JvmOverloads
-  public fun composeTestTagScope(
-    testTag: String,
-    inScope: ScanScope = AllWindowsScope
-  ): ScanScope {
+  public fun composeTestTagScope(testTag: String, inScope: ScanScope = AllWindowsScope): ScanScope {
     if (!isComposeAvailable) return EmptyScope
 
     fun ScannableView.subtreesMatching(
@@ -74,7 +67,8 @@ public object ScanScopes {
 
     return ScanScope {
       try {
-        return@ScanScope inScope.findRoots()
+        return@ScanScope inScope
+          .findRoots()
           .asSequence()
           .flatMap { rootView ->
             rootView.subtreesMatching { (it is ComposeView) && testTag in it.findTestTags() }

@@ -14,16 +14,17 @@ import radiography.ScannableView.AndroidView
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 internal class AndroidViewTest {
-  @Suppress("DEPRECATION")
-  private val context: Context = RuntimeEnvironment.application
+  @Suppress("DEPRECATION") private val context: Context = RuntimeEnvironment.application
 
-  @Test fun `children are reported`() {
+  @Test
+  fun `children are reported`() {
     val child1 = View(context)
     val child2 = View(context)
-    val view = FrameLayout(context).apply {
-      addView(child1)
-      addView(child2)
-    }
+    val view =
+      FrameLayout(context).apply {
+        addView(child1)
+        addView(child2)
+      }
 
     val children = AndroidView(view).children.toList()
     assertThat(children).hasSize(2)
@@ -31,13 +32,15 @@ internal class AndroidViewTest {
     assertThat((children[1] as AndroidView).view).isSameInstanceAs(child2)
   }
 
-  @Test fun `view removed before hasNext is not reported1`() {
+  @Test
+  fun `view removed before hasNext is not reported1`() {
     val child1 = View(context)
     val child2 = View(context)
-    val view = FrameLayout(context).apply {
-      addView(child1)
-      addView(child2)
-    }
+    val view =
+      FrameLayout(context).apply {
+        addView(child1)
+        addView(child2)
+      }
 
     val children = AndroidView(view).children
     val childIterator = children.iterator()
@@ -49,13 +52,15 @@ internal class AndroidViewTest {
     assertThat(childIterator.hasNext()).isFalse()
   }
 
-  @Test fun `view removed after hasNext is reported`() {
+  @Test
+  fun `view removed after hasNext is reported`() {
     val child1 = View(context)
     val child2 = View(context)
-    val view = FrameLayout(context).apply {
-      addView(child1)
-      addView(child2)
-    }
+    val view =
+      FrameLayout(context).apply {
+        addView(child1)
+        addView(child2)
+      }
 
     val children = AndroidView(view).children
     val childIterator = children.iterator()
@@ -71,12 +76,11 @@ internal class AndroidViewTest {
     assertThat((childIterator.next() as AndroidView).view).isSameInstanceAs(child2)
   }
 
-  @Test fun `view added after hasNext is not reported`() {
+  @Test
+  fun `view added after hasNext is not reported`() {
     val child1 = View(context)
     val child2 = View(context)
-    val view = FrameLayout(context).apply {
-      addView(child1)
-    }
+    val view = FrameLayout(context).apply { addView(child1) }
 
     val children = AndroidView(view).children
     val childIterator = children.iterator()

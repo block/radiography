@@ -63,20 +63,15 @@ import radiography.ViewStateRenderers.DefaultsNoPii
 import radiography.ViewStateRenderers.ViewRenderer
 import radiography.ViewStateRenderers.textViewRenderer
 
-// Ktlint will complain about the extra braces in ${BLANK}, but they're required for some lines,
-// so keeping them everywhere helps keep multiline strings aligned.
-/* ktlint-disable string-template */
 @Suppress("TestFunctionName")
 @OptIn(ExperimentalRadiographyComposeApi::class)
 class ComposeUiTest {
 
-  @get:Rule
-  val composeRule = createComposeRule()
+  @get:Rule val composeRule = createComposeRule()
 
-  @Test fun when_includingPii_then_hierarchyContainsText() {
-    composeRule.setContentWithExplicitRoot {
-      BasicText("FooBar")
-    }
+  @Test
+  fun when_includingPii_then_hierarchyContainsText() {
+    composeRule.setContentWithExplicitRoot { BasicText("FooBar") }
 
     composeRule.runOnIdle {
       val hierarchy = Radiography.scan(viewStateRenderers = DefaultsIncludingPii)
@@ -84,10 +79,9 @@ class ComposeUiTest {
     }
   }
 
-  @Test fun when_noPii_then_hierarchyExcludesText() {
-    composeRule.setContentWithExplicitRoot {
-      BasicText("FooBar")
-    }
+  @Test
+  fun when_noPii_then_hierarchyExcludesText() {
+    composeRule.setContentWithExplicitRoot { BasicText("FooBar") }
 
     composeRule.runOnIdle {
       val hierarchy = Radiography.scan(viewStateRenderers = DefaultsNoPii)
@@ -96,11 +90,10 @@ class ComposeUiTest {
     }
   }
 
-  @Test fun viewSizeReported() {
+  @Test
+  fun viewSizeReported() {
     composeRule.setContentWithExplicitRoot {
-      val (width, height) = with(LocalDensity.current) {
-        Pair(30.toDp(), 40.toDp())
-      }
+      val (width, height) = with(LocalDensity.current) { Pair(30.toDp(), 40.toDp()) }
       Box(modifier = Modifier.size(width, height))
     }
 
@@ -111,20 +104,18 @@ class ComposeUiTest {
     assertThat(hierarchy).contains("Box { 30×40px }")
   }
 
-  @Test fun zeroSizeViewReported() {
-    composeRule.setContentWithExplicitRoot {
-      Box(Modifier)
-    }
+  @Test
+  fun zeroSizeViewReported() {
+    composeRule.setContentWithExplicitRoot { Box(Modifier) }
 
-    val hierarchy = composeRule.runOnIdle {
-      Radiography.scan(viewStateRenderers = emptyList())
-    }
+    val hierarchy = composeRule.runOnIdle { Radiography.scan(viewStateRenderers = emptyList()) }
 
     assertThat(hierarchy).contains("Box")
   }
 
   @OptIn(ExperimentalComposeUiApi::class)
-  @Test fun semanticsAreReported() {
+  @Test
+  fun semanticsAreReported() {
     composeRule.setContentWithExplicitRoot {
       Box(Modifier.semantics { set(TestTag, "test tag") })
       Box(Modifier.semantics { set(ContentDescription, listOf("content description")) })
@@ -139,18 +130,16 @@ class ComposeUiTest {
       Box(Modifier.semantics { set(PaneTitle, "pane title") })
       Box(Modifier.semantics { set(SelectableGroup, Unit) })
       Box(Modifier.semantics { set(Heading, Unit) })
-      Box(Modifier.semantics {
-        set(
-          HorizontalScrollAxisRange,
-          ScrollAxisRange(value = { .3f }, maxValue = { .5f })
-        )
-      })
-      Box(Modifier.semantics {
-        set(
-          VerticalScrollAxisRange,
-          ScrollAxisRange(value = { .4f }, maxValue = { .5f })
-        )
-      })
+      Box(
+        Modifier.semantics {
+          set(HorizontalScrollAxisRange, ScrollAxisRange(value = { .3f }, maxValue = { .5f }))
+        }
+      )
+      Box(
+        Modifier.semantics {
+          set(VerticalScrollAxisRange, ScrollAxisRange(value = { .4f }, maxValue = { .5f }))
+        }
+      )
       Box(Modifier.semantics { set(Role, RadioButton) })
       Box(Modifier.semantics { set(TextSelectionRange, TextRange(3, 4)) })
       Box(Modifier.semantics { set(ImeAction, Send) })
@@ -159,9 +148,7 @@ class ComposeUiTest {
       Box(Modifier.semantics { set(Password, Unit) })
     }
 
-    val hierarchy = composeRule.runOnIdle {
-      Radiography.scan()
-    }
+    val hierarchy = composeRule.runOnIdle { Radiography.scan() }
 
     assertThat(hierarchy).contains("Box { test-tag:\"test tag\" }")
     assertThat(hierarchy).contains("Box { content-description:[\"content description\"] }")
@@ -171,13 +158,18 @@ class ComposeUiTest {
     assertThat(hierarchy).contains("Box")
     assertThat(hierarchy).contains("Box { DIALOG }")
     assertThat(hierarchy).contains("Box { POPUP }")
-    assertThat(hierarchy).contains("Box { progress-bar-range:ProgressBarRangeInfo(current=0.2, range=0.0..0.5, steps=0) }")
+    assertThat(hierarchy)
+      .contains(
+        "Box { progress-bar-range:ProgressBarRangeInfo(current=0.2, range=0.0..0.5, steps=0) }"
+      )
     assertThat(hierarchy).contains("Box { pane-title:\"pane title\" }")
     assertThat(hierarchy).contains("Box { SELECTABLE-GROUP }")
     assertThat(hierarchy).contains("Box { HEADING }")
     assertThat(hierarchy).contains("Box { INVISIBLE-TO-USER }")
-    assertThat(hierarchy).contains("Box { horizontal-scroll-axis-range:\"ScrollAxisRange(value=0.3, maxValue=0.5)\" }")
-    assertThat(hierarchy).contains("Box { vertical-scroll-axis-range:\"ScrollAxisRange(value=0.4, maxValue=0.5)\" }")
+    assertThat(hierarchy)
+      .contains("Box { horizontal-scroll-axis-range:\"ScrollAxisRange(value=0.3, maxValue=0.5)\" }")
+    assertThat(hierarchy)
+      .contains("Box { vertical-scroll-axis-range:\"ScrollAxisRange(value=0.4, maxValue=0.5)\" }")
     assertThat(hierarchy).contains("Box { role:RadioButton }")
     assertThat(hierarchy).contains("Box { SELECTED-TEXT }")
     assertThat(hierarchy).contains("Box { ime-action:Send }")
@@ -192,22 +184,20 @@ class ComposeUiTest {
    */
   @Suppress("DEPRECATION")
   @OptIn(ExperimentalComposeUiApi::class)
-  @Test fun deprecatedSemanticsAreReported() {
+  @Test
+  fun deprecatedSemanticsAreReported() {
     composeRule.setContentWithExplicitRoot {
       Box(Modifier.semantics { set(InvisibleToUser, Unit) })
     }
 
-    val hierarchy = composeRule.runOnIdle {
-      Radiography.scan()
-    }
+    val hierarchy = composeRule.runOnIdle { Radiography.scan() }
 
     assertThat(hierarchy).contains("Box { INVISIBLE-TO-USER }")
   }
 
-  @Test fun checkableChecked() {
-    composeRule.setContentWithExplicitRoot {
-      Checkbox(checked = true, onCheckedChange = {})
-    }
+  @Test
+  fun checkableChecked() {
+    composeRule.setContentWithExplicitRoot { Checkbox(checked = true, onCheckedChange = {}) }
 
     val hierarchy = composeRule.runOnIdle {
       Radiography.scan(viewStateRenderers = listOf(ViewRenderer))
@@ -217,10 +207,9 @@ class ComposeUiTest {
     assertThat(hierarchy).contains("toggle-state:On")
   }
 
-  @Test fun textEmptyContents() {
-    composeRule.setContentWithExplicitRoot {
-      BasicText("")
-    }
+  @Test
+  fun textEmptyContents() {
+    composeRule.setContentWithExplicitRoot { BasicText("") }
 
     val hierarchy = composeRule.runOnIdle {
       Radiography.scan(viewStateRenderers = listOf(textViewRenderer(renderTextValue = true)))
@@ -230,10 +219,9 @@ class ComposeUiTest {
     assertThat(hierarchy).contains("text:\"\"")
   }
 
-  @Test fun textContents() {
-    composeRule.setContentWithExplicitRoot {
-      BasicText("Baguette Avec Fromage")
-    }
+  @Test
+  fun textContents() {
+    composeRule.setContentWithExplicitRoot { BasicText("Baguette Avec Fromage") }
 
     val hierarchy = composeRule.runOnIdle {
       Radiography.scan(viewStateRenderers = listOf(textViewRenderer(renderTextValue = true)))
@@ -243,19 +231,14 @@ class ComposeUiTest {
     assertThat(hierarchy).contains("text:\"Baguette Avec Fromage\"")
   }
 
-  @Test fun textContentsEllipsized() {
-    composeRule.setContentWithExplicitRoot {
-      BasicText("Baguette Avec Fromage")
-    }
+  @Test
+  fun textContentsEllipsized() {
+    composeRule.setContentWithExplicitRoot { BasicText("Baguette Avec Fromage") }
 
     val hierarchy = composeRule.runOnIdle {
       Radiography.scan(
-        viewStateRenderers = listOf(
-          textViewRenderer(
-            renderTextValue = true,
-            textValueMaxLength = 11
-          )
-        )
+        viewStateRenderers =
+          listOf(textViewRenderer(renderTextValue = true, textValueMaxLength = 11))
       )
     }
 
@@ -263,23 +246,19 @@ class ComposeUiTest {
     assertThat(hierarchy).contains("text:\"Baguette A…\"")
   }
 
-  @Test fun textExcludedByDefault() {
-    composeRule.setContentWithExplicitRoot {
-      BasicText("Baguette Avec Fromage")
-    }
+  @Test
+  fun textExcludedByDefault() {
+    composeRule.setContentWithExplicitRoot { BasicText("Baguette Avec Fromage") }
 
-    val hierarchy = composeRule.runOnIdle {
-      Radiography.scan()
-    }
+    val hierarchy = composeRule.runOnIdle { Radiography.scan() }
 
     assertThat(hierarchy).contains("text-length:21")
     assertThat(hierarchy).doesNotContain("text:")
   }
 
-  @Test fun textFieldEmptyContents() {
-    composeRule.setContentWithExplicitRoot {
-      TextField("", onValueChange = {}, label = {})
-    }
+  @Test
+  fun textFieldEmptyContents() {
+    composeRule.setContentWithExplicitRoot { TextField("", onValueChange = {}, label = {}) }
 
     val hierarchy = composeRule.runOnIdle {
       Radiography.scan(viewStateRenderers = listOf(textViewRenderer(renderTextValue = true)))
@@ -288,7 +267,8 @@ class ComposeUiTest {
     assertThat(hierarchy).contains("text:\"\"")
   }
 
-  @Test fun textFieldContents() {
+  @Test
+  fun textFieldContents() {
     composeRule.setContentWithExplicitRoot {
       TextField("Baguette Avec Fromage", onValueChange = {}, label = {})
     }
@@ -300,19 +280,16 @@ class ComposeUiTest {
     assertThat(hierarchy).contains("text:\"Baguette Avec Fromage\"")
   }
 
-  @Test fun textFieldContentsEllipsized() {
+  @Test
+  fun textFieldContentsEllipsized() {
     composeRule.setContentWithExplicitRoot {
       TextField("Baguette Avec Fromage", onValueChange = {}, label = {})
     }
 
     val hierarchy = composeRule.runOnIdle {
       Radiography.scan(
-        viewStateRenderers = listOf(
-          textViewRenderer(
-            renderTextValue = true,
-            textValueMaxLength = 11
-          )
-        )
+        viewStateRenderers =
+          listOf(textViewRenderer(renderTextValue = true, textValueMaxLength = 11))
       )
     }
 
@@ -320,11 +297,10 @@ class ComposeUiTest {
     assertThat(hierarchy).contains("text:\"Baguette A…\"")
   }
 
-  @Test fun skipTestTags() {
+  @Test
+  fun skipTestTags() {
     composeRule.setContentWithExplicitRoot {
-      Box {
-        Button(modifier = Modifier.testTag("42"), onClick = {}, content = {})
-      }
+      Box { Button(modifier = Modifier.testTag("42"), onClick = {}, content = {}) }
     }
 
     val hierarchy = composeRule.runOnIdle {
@@ -335,7 +311,8 @@ class ComposeUiTest {
     assertThat(hierarchy).doesNotContain("Button")
   }
 
-  @Test fun nestedLayouts() {
+  @Test
+  fun nestedLayouts() {
     composeRule.setContentWithExplicitRoot {
       Box(Modifier.testTag("root")) {
         Box(Modifier)
@@ -350,13 +327,12 @@ class ComposeUiTest {
       }
     }
 
-    val hierarchy = composeRule.runOnIdle {
-      Radiography.scan(composeTestTagScope("root"))
-    }
+    val hierarchy = composeRule.runOnIdle { Radiography.scan(composeTestTagScope("root")) }
 
     @Suppress("RemoveCurlyBracesFromTemplate")
-    assertThat(hierarchy).contains(
-      """
+    assertThat(hierarchy)
+      .contains(
+        """
         Box:
       $BLANK ${BLANK}Box { test-tag:"root" }
       $BLANK ${BLANK}├─Box
@@ -366,96 +342,94 @@ class ComposeUiTest {
       $BLANK ${BLANK}╰─Row
       $BLANK ${BLANK}  ├─Box
       $BLANK ${BLANK}  ╰─Box
-      """.trimIndent()
-    )
+      """
+          .trimIndent()
+      )
   }
 
-  @Test fun nestedViewsInsideLayouts() {
+  @Test
+  fun nestedViewsInsideLayouts() {
     composeRule.setContentWithExplicitRoot {
       Box(Modifier.testTag("root")) {
-        AndroidView(::TextView) {
-          it.layoutParams = LayoutParams(0, 42)
-        }
+        AndroidView(::TextView) { it.layoutParams = LayoutParams(0, 42) }
       }
     }
 
-    val hierarchy = composeRule.runOnIdle {
-      Radiography.scan(composeTestTagScope("root"))
-    }
+    val hierarchy = composeRule.runOnIdle { Radiography.scan(composeTestTagScope("root")) }
 
     // The stuff immediately below the AndroidView is implementation details, testing it is brittle
     // and pointless.
     @Suppress("RemoveCurlyBracesFromTemplate")
-    assertThat(hierarchy).contains(
-      """
+    assertThat(hierarchy)
+      .contains(
+        """
       ${BLANK} Box:
         ${BLANK}Box { 0×42px, test-tag:"root" }
       ${BLANK} ${BLANK}╰─AndroidView { 0×42px }
-      """.trimIndent()
-    )
+      """
+          .trimIndent()
+      )
     // But this view description should show up at some point.
     assertThat(hierarchy).contains("╰─TextView { 0×42px, text-length:0 }")
   }
 
-  @Test fun scanningHandlesDialog() {
+  @Test
+  fun scanningHandlesDialog() {
     composeRule.setContent {
       currentComposer.collectParameterInformation()
 
       Box(Modifier.testTag("parent")) {
-        Dialog(onDismissRequest = {}) {
-          Box(Modifier.testTag("child"))
-        }
+        Dialog(onDismissRequest = {}) { Box(Modifier.testTag("child")) }
       }
     }
 
-    val hierarchy = composeRule.runOnIdle {
-      Radiography.scan(composeTestTagScope("parent"))
-    }
+    val hierarchy = composeRule.runOnIdle { Radiography.scan(composeTestTagScope("parent")) }
 
-    assertThat(hierarchy).isEqualTo(
-      """
+    assertThat(hierarchy)
+      .isEqualTo(
+        """
       |Box:
       |${BLANK}Box { test-tag:"parent" }
       |${BLANK}╰─Dialog
       |${BLANK}  ╰─ProvideCompositionLocals { DIALOG }
       |${BLANK}    ╰─Box { test-tag:"child" }
       |
-      """.trimMargin()
-    )
+      """
+          .trimMargin()
+      )
   }
 
-  @Test fun scanningHandlesWrappedDialog() {
-    @Composable fun CustomTestDialog(children: @Composable () -> Unit) {
+  @Test
+  fun scanningHandlesWrappedDialog() {
+    @Composable
+    fun CustomTestDialog(children: @Composable () -> Unit) {
       Dialog(onDismissRequest = {}, content = children)
     }
 
     composeRule.setContent {
       currentComposer.collectParameterInformation()
 
-      Box(Modifier.testTag("parent")) {
-        CustomTestDialog {
-          Box(Modifier.testTag("child"))
-        }
-      }
+      Box(Modifier.testTag("parent")) { CustomTestDialog { Box(Modifier.testTag("child")) } }
     }
 
-    val hierarchy = composeRule.runOnIdle {
-      Radiography.scan(composeTestTagScope("parent"))
-    }
+    val hierarchy = composeRule.runOnIdle { Radiography.scan(composeTestTagScope("parent")) }
 
-    assertThat(hierarchy).isEqualTo(
-      """
+    assertThat(hierarchy)
+      .isEqualTo(
+        """
       |Box:
       |${BLANK}Box { test-tag:"parent" }
       |${BLANK}╰─CustomTestDialog
       |${BLANK}  ╰─ProvideCompositionLocals { DIALOG }
       |${BLANK}    ╰─Box { test-tag:"child" }
       |
-      """.trimMargin()
-    )
+      """
+          .trimMargin()
+      )
   }
 
-  @Test fun scanningHandlesSingleSubcomposeLayout_withSingleChild() {
+  @Test
+  fun scanningHandlesSingleSubcomposeLayout_withSingleChild() {
     composeRule.setContent {
       currentComposer.collectParameterInformation()
 
@@ -466,23 +440,24 @@ class ComposeUiTest {
       }
     }
 
-    val hierarchy = composeRule.runOnIdle {
-      Radiography.scan(composeTestTagScope("parent"))
-    }
+    val hierarchy = composeRule.runOnIdle { Radiography.scan(composeTestTagScope("parent")) }
 
-    assertThat(hierarchy).isEqualTo(
-      """
+    assertThat(hierarchy)
+      .isEqualTo(
+        """
       |Box:
       |${BLANK}Box { test-tag:"parent" }
       |${BLANK}╰─SingleSubcompositionLayout { test-tag:"subcompose-layout" }
       |${BLANK}  ╰─<subcomposition of SingleSubcompositionLayout>
       |${BLANK}    ╰─Box { test-tag:"child" }
       |
-      """.trimMargin()
-    )
+      """
+          .trimMargin()
+      )
   }
 
-  @Test fun scanningHandlesSingleSubcomposeLayout_withMultipleChildren() {
+  @Test
+  fun scanningHandlesSingleSubcomposeLayout_withMultipleChildren() {
     composeRule.setContent {
       currentComposer.collectParameterInformation()
 
@@ -494,12 +469,11 @@ class ComposeUiTest {
       }
     }
 
-    val hierarchy = composeRule.runOnIdle {
-      Radiography.scan(composeTestTagScope("parent"))
-    }
+    val hierarchy = composeRule.runOnIdle { Radiography.scan(composeTestTagScope("parent")) }
 
-    assertThat(hierarchy).isEqualTo(
-      """
+    assertThat(hierarchy)
+      .isEqualTo(
+        """
       |Box:
       |${BLANK}Box { test-tag:"parent" }
       |${BLANK}╰─SingleSubcompositionLayout { test-tag:"subcompose-layout" }
@@ -507,16 +481,19 @@ class ComposeUiTest {
       |${BLANK}    ├─Box { test-tag:"child1" }
       |${BLANK}    ╰─Box { test-tag:"child2" }
       |
-      """.trimMargin()
-    )
+      """
+          .trimMargin()
+      )
   }
 
-  @Test fun scanningHandlesSingleSubcomposeLayout_withMultipleSubcompositionsAndChildren() {
+  @Test
+  fun scanningHandlesSingleSubcomposeLayout_withMultipleSubcompositionsAndChildren() {
     composeRule.setContent {
       currentComposer.collectParameterInformation()
 
       Box(Modifier.testTag("parent")) {
-        MultipleSubcompositionLayout(Modifier.testTag("subcompose-layout"),
+        MultipleSubcompositionLayout(
+          Modifier.testTag("subcompose-layout"),
           firstChildren = {
             Box(Modifier.testTag("child1.1"))
             Box(Modifier.testTag("child1.2"))
@@ -524,16 +501,16 @@ class ComposeUiTest {
           secondChildren = {
             Box(Modifier.testTag("child2.1"))
             Box(Modifier.testTag("child2.2"))
-          })
+          },
+        )
       }
     }
 
-    val hierarchy = composeRule.runOnIdle {
-      Radiography.scan(composeTestTagScope("parent"))
-    }
+    val hierarchy = composeRule.runOnIdle { Radiography.scan(composeTestTagScope("parent")) }
 
-    assertThat(hierarchy).isEqualTo(
-      """
+    assertThat(hierarchy)
+      .isEqualTo(
+        """
       |Box:
       |${BLANK}Box { test-tag:"parent" }
       |${BLANK}╰─MultipleSubcompositionLayout { test-tag:"subcompose-layout" }
@@ -544,11 +521,13 @@ class ComposeUiTest {
       |${BLANK}    ├─Box { test-tag:"child2.1" }
       |${BLANK}    ╰─Box { test-tag:"child2.2" }
       |
-      """.trimMargin()
-    )
+      """
+          .trimMargin()
+      )
   }
 
-  @Test fun scanningHandlesSiblingSubcomposeLayouts() {
+  @Test
+  fun scanningHandlesSiblingSubcomposeLayouts() {
     composeRule.setContent {
       currentComposer.collectParameterInformation()
 
@@ -562,12 +541,11 @@ class ComposeUiTest {
       }
     }
 
-    val hierarchy = composeRule.runOnIdle {
-      Radiography.scan(composeTestTagScope("parent"))
-    }
+    val hierarchy = composeRule.runOnIdle { Radiography.scan(composeTestTagScope("parent")) }
 
-    assertThat(hierarchy).isEqualTo(
-      """
+    assertThat(hierarchy)
+      .isEqualTo(
+        """
       |Box:
       |${BLANK}Box { test-tag:"parent" }
       |${BLANK}├─SingleSubcompositionLayout { test-tag:"subcompose-layout1" }
@@ -577,38 +555,39 @@ class ComposeUiTest {
       |${BLANK}  ╰─<subcomposition of SingleSubcompositionLayout>
       |${BLANK}    ╰─Box { test-tag:"child2" }
       |
-      """.trimMargin()
-    )
+      """
+          .trimMargin()
+      )
   }
 
-  @Test fun scanningHandlesWithConstraints() {
+  @Test
+  fun scanningHandlesWithConstraints() {
     composeRule.setContent {
       currentComposer.collectParameterInformation()
 
       Box(Modifier.testTag("parent")) {
-        BoxWithConstraints(Modifier.testTag("with-constraints")) {
-          Box(Modifier.testTag("child"))
-        }
+        BoxWithConstraints(Modifier.testTag("with-constraints")) { Box(Modifier.testTag("child")) }
       }
     }
 
-    val hierarchy = composeRule.runOnIdle {
-      Radiography.scan(composeTestTagScope("parent"))
-    }
+    val hierarchy = composeRule.runOnIdle { Radiography.scan(composeTestTagScope("parent")) }
 
-    assertThat(hierarchy).isEqualTo(
-      """
+    assertThat(hierarchy)
+      .isEqualTo(
+        """
       |Box:
       |${BLANK}Box { test-tag:"parent" }
       |${BLANK}╰─BoxWithConstraints { test-tag:"with-constraints" }
       |${BLANK}  ╰─<subcomposition of BoxWithConstraints>
       |${BLANK}    ╰─Box { test-tag:"child" }
       |
-      """.trimMargin()
-    )
+      """
+          .trimMargin()
+      )
   }
 
-  @Test fun scanningHandlesLazyLists() {
+  @Test
+  fun scanningHandlesLazyLists() {
     composeRule.setContent {
       currentComposer.collectParameterInformation()
 
@@ -624,12 +603,11 @@ class ComposeUiTest {
       }
     }
 
-    val hierarchy = composeRule.runOnIdle {
-      Radiography.scan(composeTestTagScope("parent"))
-    }
+    val hierarchy = composeRule.runOnIdle { Radiography.scan(composeTestTagScope("parent")) }
 
-    assertThat(hierarchy).isEqualTo(
-      """
+    assertThat(hierarchy)
+      .isEqualTo(
+        """
       |Box:
       |${BLANK}Box { test-tag:"parent" }
       |${BLANK}╰─LazyColumn { test-tag:"list", vertical-scroll-axis-range:"ScrollAxisRange(value=0.0, maxValue=0.0)" }
@@ -641,11 +619,13 @@ class ComposeUiTest {
       |${BLANK}  ╰─<subcomposition of LazyColumn>
       |${BLANK}    ╰─SkippableItem { test-tag:"child:3" }
       |
-      """.trimMargin()
-    )
+      """
+          .trimMargin()
+      )
   }
 
-  @Test fun scanningSubcomposition_includesSize() {
+  @Test
+  fun scanningSubcomposition_includesSize() {
     composeRule.setContent {
       currentComposer.collectParameterInformation()
 
@@ -653,36 +633,22 @@ class ComposeUiTest {
       val sizeDp = with(LocalDensity.current) { 10.toDp() }
 
       Box(Modifier.testTag("parent")) {
-        MultipleSubcompositionLayout(Modifier.testTag("subcompose-layout"),
+        MultipleSubcompositionLayout(
+          Modifier.testTag("subcompose-layout"),
           firstChildren = {
-            Box(
-              Modifier
-                .testTag("child1")
-                .size(sizeDp)
-            )
-            Box(
-              Modifier
-                .testTag("child2")
-                .size(sizeDp)
-            )
+            Box(Modifier.testTag("child1").size(sizeDp))
+            Box(Modifier.testTag("child2").size(sizeDp))
           },
-          secondChildren = {
-            Box(
-              Modifier
-                .testTag("child3")
-                .size(sizeDp)
-            )
-          }
+          secondChildren = { Box(Modifier.testTag("child3").size(sizeDp)) },
         )
       }
     }
 
-    val hierarchy = composeRule.runOnIdle {
-      Radiography.scan(composeTestTagScope("parent"))
-    }
+    val hierarchy = composeRule.runOnIdle { Radiography.scan(composeTestTagScope("parent")) }
 
-    assertThat(hierarchy).isEqualTo(
-      """
+    assertThat(hierarchy)
+      .isEqualTo(
+        """
       |Box:
       |${BLANK}Box { 10×30px, test-tag:"parent" }
       |${BLANK}╰─MultipleSubcompositionLayout { 10×30px, test-tag:"subcompose-layout" }
@@ -692,25 +658,21 @@ class ComposeUiTest {
       |${BLANK}  ╰─<subcomposition of MultipleSubcompositionLayout>
       |${BLANK}    ╰─Box { 10×10px, test-tag:"child3" }
       |
-      """.trimMargin()
-    )
+      """
+          .trimMargin()
+      )
   }
 
   /**
-   * Wrap the call to SubcomposeLayout, since real code almost never calls SubcomposeLayout
-   * directly in line, so this more accurately represents a real use case.
+   * Wrap the call to SubcomposeLayout, since real code almost never calls SubcomposeLayout directly
+   * in line, so this more accurately represents a real use case.
    */
-  @Composable private fun SingleSubcompositionLayout(
-    modifier: Modifier,
-    children: @Composable () -> Unit
-  ) {
+  @Composable
+  private fun SingleSubcompositionLayout(modifier: Modifier, children: @Composable () -> Unit) {
     SubcomposeLayout(modifier) { constraints ->
-      val placeables = subcompose(Unit, children)
-        .map { it.measure(constraints) }
+      val placeables = subcompose(Unit, children).map { it.measure(constraints) }
 
-      layout(0, 0) {
-        placeables.forEach { it.placeRelative(0, 0) }
-      }
+      layout(0, 0) { placeables.forEach { it.placeRelative(0, 0) } }
     }
   }
 
@@ -718,20 +680,21 @@ class ComposeUiTest {
    * Like [SingleSubcompositionLayout] but creates two subcompositions, and lays out all children
    * from both compositions in a column.
    */
-  @Composable private fun MultipleSubcompositionLayout(
+  @Composable
+  private fun MultipleSubcompositionLayout(
     modifier: Modifier,
     firstChildren: @Composable () -> Unit,
-    secondChildren: @Composable () -> Unit
+    secondChildren: @Composable () -> Unit,
   ) {
     SubcomposeLayout(modifier) { constraints ->
-      val placeables = listOf(
-        subcompose(0, firstChildren),
-        subcompose(1, secondChildren),
-      ).flatten().map { it.measure(constraints) }
+      val placeables =
+        listOf(subcompose(0, firstChildren), subcompose(1, secondChildren)).flatten().map {
+          it.measure(constraints)
+        }
 
       layout(
         width = placeables.maxOfOrNull { it.width } ?: 0,
-        height = placeables.sumOf { it.height }
+        height = placeables.sumOf { it.height },
       ) {
         placeables.fold(0) { y, placeable ->
           placeable.placeRelative(0, y)
@@ -742,49 +705,52 @@ class ComposeUiTest {
   }
 
   /**
-   * Like [SingleSubcompositionLayout] but creates one subcomposition per slot, in the order
-   * slots are provided. Used to test that radiography reports subcompositions in subcompose-call
-   * order even when the internal Set of composers does not preserve insertion order.
+   * Like [SingleSubcompositionLayout] but creates one subcomposition per slot, in the order slots
+   * are provided. Used to test that radiography reports subcompositions in subcompose-call order
+   * even when the internal Set of composers does not preserve insertion order.
    */
-  @Composable private fun MultiSlotSubcompositionLayout(
+  @Composable
+  private fun MultiSlotSubcompositionLayout(
     modifier: Modifier,
-    slots: List<@Composable () -> Unit>
+    slots: List<@Composable () -> Unit>,
   ) {
     SubcomposeLayout(modifier) { constraints ->
-      val allPlaceables = slots.mapIndexed { index, content ->
-        subcompose(index, content).map { it.measure(constraints) }
-      }.flatten()
+      val allPlaceables =
+        slots
+          .mapIndexed { index, content ->
+            subcompose(index, content).map { it.measure(constraints) }
+          }
+          .flatten()
 
-      layout(0, 0) {
-        allPlaceables.forEach { it.placeRelative(0, 0) }
-      }
+      layout(0, 0) { allPlaceables.forEach { it.placeRelative(0, 0) } }
     }
   }
 
-  @Test fun scanningHandlesMultipleSubcompositionsInDeterministicOrder() {
+  @Test
+  fun scanningHandlesMultipleSubcompositionsInDeterministicOrder() {
     composeRule.setContent {
       currentComposer.collectParameterInformation()
 
       Box(Modifier.testTag("parent")) {
         MultiSlotSubcompositionLayout(
           modifier = Modifier.testTag("subcompose-layout"),
-          slots = listOf(
-            { Box(Modifier.testTag("slot1")) },
-            { Box(Modifier.testTag("slot2")) },
-            { Box(Modifier.testTag("slot3")) },
-            { Box(Modifier.testTag("slot4")) },
-          )
+          slots =
+            listOf(
+              { Box(Modifier.testTag("slot1")) },
+              { Box(Modifier.testTag("slot2")) },
+              { Box(Modifier.testTag("slot3")) },
+              { Box(Modifier.testTag("slot4")) },
+            ),
         )
       }
     }
 
-    val hierarchy = composeRule.runOnIdle {
-      Radiography.scan(composeTestTagScope("parent"))
-    }
+    val hierarchy = composeRule.runOnIdle { Radiography.scan(composeTestTagScope("parent")) }
 
     @Suppress("RemoveCurlyBracesFromTemplate")
-    assertThat(hierarchy).isEqualTo(
-      """
+    assertThat(hierarchy)
+      .isEqualTo(
+        """
       |Box:
       |${BLANK}Box { test-tag:"parent" }
       |${BLANK}╰─MultiSlotSubcompositionLayout { test-tag:"subcompose-layout" }
@@ -797,8 +763,9 @@ class ComposeUiTest {
       |${BLANK}  ╰─<subcomposition of MultiSlotSubcompositionLayout>
       |${BLANK}    ╰─Box { test-tag:"slot4" }
       |
-      """.trimMargin()
-    )
+      """
+          .trimMargin()
+      )
   }
 
   companion object {

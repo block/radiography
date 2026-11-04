@@ -18,29 +18,29 @@ private class ComposerVariantConstants(
 
 private fun tryLoadVariant(composerClassName: String): ComposerVariantConstants? {
   return try {
-    val contextHolderClass =
-      Class.forName("$composerClassName\$CompositionContextHolder")
-    val contextImplClass =
-      Class.forName("$composerClassName\$CompositionContextImpl")
-    val refField = contextHolderClass.getDeclaredField("ref")
-      .apply { isAccessible = true }
-    val composersField = contextImplClass.getDeclaredField("composers")
-      .apply { isAccessible = true }
+    val contextHolderClass = Class.forName("$composerClassName\$CompositionContextHolder")
+    val contextImplClass = Class.forName("$composerClassName\$CompositionContextImpl")
+    val refField = contextHolderClass.getDeclaredField("ref").apply { isAccessible = true }
+    val composersField =
+      contextImplClass.getDeclaredField("composers").apply { isAccessible = true }
 
     val composersToIterable: (Any) -> Iterable<*> = run {
       val fieldType = composersField.type
       when {
-        Iterable::class.java.isAssignableFrom(fieldType) -> { obj -> obj as Iterable<*> }
+        Iterable::class.java.isAssignableFrom(fieldType) -> { obj ->
+          obj as Iterable<*>
+        }
         else -> {
-          val asSetMethod: Method? = try {
-            fieldType.getMethod("asSet")
-          } catch (_: NoSuchMethodException) {
+          val asSetMethod: Method? =
             try {
-              fieldType.getMethod("asMutableSet")
+              fieldType.getMethod("asSet")
             } catch (_: NoSuchMethodException) {
-              null
+              try {
+                fieldType.getMethod("asMutableSet")
+              } catch (_: NoSuchMethodException) {
+                null
+              }
             }
-          }
           if (asSetMethod != null) {
             { obj -> asSetMethod(obj) as Iterable<*> }
           } else {
@@ -51,53 +51,56 @@ private fun tryLoadVariant(composerClassName: String): ComposerVariantConstants?
     }
 
     ComposerVariantConstants(
-      contextHolderClass, contextImplClass, refField, composersField, composersToIterable
+      contextHolderClass,
+      contextImplClass,
+      refField,
+      composersField,
+      composersToIterable,
     )
   } catch (_: Throwable) {
     null
   }
 }
 
-private val COMPOSER_VARIANTS: List<ComposerVariantConstants> by lazy(PUBLICATION) {
-  listOf(
-    "androidx.compose.runtime.GapComposer",
-    "androidx.compose.runtime.LinkComposer",
-    "androidx.compose.runtime.ComposerImpl",
-  ).mapNotNull { tryLoadVariant(it) }
-}
+private val COMPOSER_VARIANTS: List<ComposerVariantConstants> by
+  lazy(PUBLICATION) {
+    listOf(
+        "androidx.compose.runtime.GapComposer",
+        "androidx.compose.runtime.LinkComposer",
+        "androidx.compose.runtime.ComposerImpl",
+      )
+      .mapNotNull { tryLoadVariant(it) }
+  }
 
-private val REMEMBER_OBSERVER_HOLDER_CLASS: Class<*> by lazy(PUBLICATION) {
-  Class.forName("androidx.compose.runtime.RememberObserverHolder")
-}
+private val REMEMBER_OBSERVER_HOLDER_CLASS: Class<*> by
+  lazy(PUBLICATION) { Class.forName("androidx.compose.runtime.RememberObserverHolder") }
 
-private val GET_WRAPPED_METHOD: Method by lazy(PUBLICATION) {
-  REMEMBER_OBSERVER_HOLDER_CLASS.getMethod("getWrapped")
-}
+private val GET_WRAPPED_METHOD: Method by
+  lazy(PUBLICATION) { REMEMBER_OBSERVER_HOLDER_CLASS.getMethod("getWrapped") }
 
 @OptIn(UiToolingDataApi::class)
 internal fun Group.getCompositionContexts(): Sequence<CompositionContext> {
   return if (COMPOSER_VARIANTS.isEmpty()) {
     emptySequence()
   } else {
-    data.asSequence()
-      .mapNotNull { datum ->
-        if (datum == null) return@mapNotNull null
-        // Try direct match (Compose <= 1.10: data contains CompositionContextHolder directly)
-        for (variant in COMPOSER_VARIANTS) {
-          if (variant.contextHolderClass.isInstance(datum)) {
-            return@mapNotNull variant.refField.get(datum) as? CompositionContext
-          }
+    data.asSequence().mapNotNull { datum ->
+      if (datum == null) return@mapNotNull null
+      // Try direct match (Compose <= 1.10: data contains CompositionContextHolder directly)
+      for (variant in COMPOSER_VARIANTS) {
+        if (variant.contextHolderClass.isInstance(datum)) {
+          return@mapNotNull variant.refField.get(datum) as? CompositionContext
         }
-        // Compose >= 1.11: data contains RememberObserverHolder wrapping CompositionContextHolder
-        if (!REMEMBER_OBSERVER_HOLDER_CLASS.isInstance(datum)) return@mapNotNull null
-        val wrapped = GET_WRAPPED_METHOD(datum) ?: return@mapNotNull null
-        for (variant in COMPOSER_VARIANTS) {
-          if (variant.contextHolderClass.isInstance(wrapped)) {
-            return@mapNotNull variant.refField.get(wrapped) as? CompositionContext
-          }
-        }
-        null
       }
+      // Compose >= 1.11: data contains RememberObserverHolder wrapping CompositionContextHolder
+      if (!REMEMBER_OBSERVER_HOLDER_CLASS.isInstance(datum)) return@mapNotNull null
+      val wrapped = GET_WRAPPED_METHOD(datum) ?: return@mapNotNull null
+      for (variant in COMPOSER_VARIANTS) {
+        if (variant.contextHolderClass.isInstance(wrapped)) {
+          return@mapNotNull variant.refField.get(wrapped) as? CompositionContext
+        }
+      }
+      null
+    }
   }
 }
 

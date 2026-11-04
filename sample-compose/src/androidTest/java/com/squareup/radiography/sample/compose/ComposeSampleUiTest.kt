@@ -12,22 +12,24 @@ import org.junit.Test
 
 class ComposeSampleUiTest {
 
-  @get:Rule
-  val composeRule = createAndroidComposeRule<MainActivity>()
+  @get:Rule val composeRule = createAndroidComposeRule<MainActivity>()
 
-  @Test fun launches() {
+  @Test
+  fun launches() {
     composeRule.onNodeWithText("Remember me").assertIsDisplayed()
   }
 
-  @Test fun displaysHierarchyInline() {
-    composeRule.onNodeWithTag(LIVE_HIERARCHY_TEST_TAG)
+  @Test
+  fun displaysHierarchyInline() {
+    composeRule
+      .onNodeWithTag(LIVE_HIERARCHY_TEST_TAG)
       .assert(hasText("Remember me", substring = true))
       .assert(hasText("toggle-state:Off", substring = true))
 
-    composeRule.onNodeWithTag(TEXT_FIELD_TEST_TAG)
-      .performTextReplacement("foobar")
+    composeRule.onNodeWithTag(TEXT_FIELD_TEST_TAG).performTextReplacement("foobar")
 
-    composeRule.onNodeWithTag(LIVE_HIERARCHY_TEST_TAG)
+    composeRule
+      .onNodeWithTag(LIVE_HIERARCHY_TEST_TAG)
       .assert(hasText("Remember me", substring = true))
       .assert(hasText("foobar", substring = true))
   }

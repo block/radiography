@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import com.ncorti.ktfmt.gradle.KtfmtExtension
 import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
-import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import kotlinx.validation.ApiValidationExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.jlleitschuh.gradle.ktlint.KtlintExtension
-import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 println("Building with Kotlin compiler version ${libs.versions.kotlin.get()}")
 
@@ -38,7 +36,7 @@ buildscript {
     classpath(libs.build.mavenPublish)
     classpath(libs.build.kotlin)
     classpath(libs.build.compose.compiler)
-    classpath(libs.build.ktlint)
+    classpath(libs.build.ktfmt)
     classpath(libs.build.binaryCompatibility)
     // Required for the gradle-maven-publish-plugin plugin.
     // See https://github.com/vanniktech/gradle-maven-publish-plugin/issues/205.
@@ -58,26 +56,39 @@ extensions.configure<ApiValidationExtension> {
   // stoic-plugin builds a plugin to use with stoic - it's also not part of our API.
   // Only leaf project name is valid configuration, and every project must be individually ignored.
   // See https://github.com/Kotlin/binary-compatibility-validator/issues/3
-  ignoredProjects = mutableSetOf(
-    "compose-tests",
-    "compose-unsupported-tests",
-    "sample",
-    "sample-compose",
-    "stoic-plugin",
-  )
+  ignoredProjects =
+    mutableSetOf(
+      "compose-tests",
+      "compose-unsupported-tests",
+      "sample",
+      "sample-compose",
+      "stoic-plugin",
+    )
 }
 
 // See https://stackoverflow.com/questions/25324880/detect-ide-environment-with-gradle
-val isRunningFromIde get() = project.properties["android.injected.invoked.from.ide"] == "true"
+val isRunningFromIde
+  get() = project.properties["android.injected.invoked.from.ide"] == "true"
 
-subprojects {
+allprojects {
   repositories {
     google()
     mavenCentral()
   }
 
-  apply(plugin = "org.jlleitschuh.gradle.ktlint")
+  apply(plugin = "com.ncorti.ktfmt.gradle")
 
+  // Code style is validated and applied using ktfmt (https://facebook.github.io/ktfmt/).
+  //   ./gradlew ktfmtCheck   - Check formatting in all modules
+  //   ./gradlew ktfmtFormat  - Fix formatting in all modules
+  // Configuration: https://github.com/cortinico/ktfmt-gradle
+  configure<KtfmtExtension> {
+    // Match the style used by market and workflow-kotlin.
+    googleStyle()
+  }
+}
+
+subprojects {
   plugins.withId("com.vanniktech.maven.publish.base") {
     configure<MavenPublishBaseExtension> {
       publishToMavenCentral(automaticRelease = true)
@@ -86,7 +97,11 @@ subprojects {
 
       @Suppress("DEPRECATION")
       configure(
-        AndroidSingleVariantLibrary(variant = "release", sourcesJar = true, publishJavadocJar = true),
+        AndroidSingleVariantLibrary(
+          variant = "release",
+          sourcesJar = true,
+          publishJavadocJar = true,
+        )
       )
     }
   }
@@ -100,27 +115,5 @@ subprojects {
 
       jvmTarget.set(JvmTarget.JVM_1_8)
     }
-  }
-
-  // Configuration documentation: https://github.com/JLLeitschuh/ktlint-gradle#configuration
-  configure<KtlintExtension> {
-    // Enable Kotlin 1.4 support.
-    version.set("0.38.1")
-
-    // Prints the name of failed rules.
-    verbose.set(true)
-    reporters {
-      // Default "plain" reporter is actually harder to read.
-      reporter(ReporterType.JSON)
-    }
-
-    @Suppress("DEPRECATION")
-    disabledRules.set(
-      setOf(
-        // IntelliJ refuses to sort imports correctly.
-        // This is a known issue: https://github.com/pinterest/ktlint/issues/527
-        "import-ordering"
-      )
-    )
   }
 }

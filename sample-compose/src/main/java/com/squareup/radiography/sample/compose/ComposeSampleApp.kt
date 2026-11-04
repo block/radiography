@@ -57,12 +57,14 @@ internal const val TEXT_FIELD_TEST_TAG = "text-field"
 internal const val LIVE_HIERARCHY_TEST_TAG = "live-hierarchy"
 
 @Preview(showBackground = true, showSystemUi = true)
-@Composable fun ComposeSampleAppPreview() {
+@Composable
+fun ComposeSampleAppPreview() {
   ComposeSampleApp()
 }
 
 @OptIn(ExperimentalRadiographyComposeApi::class, ExperimentalAnimationApi::class)
-@Composable fun ComposeSampleApp() {
+@Composable
+fun ComposeSampleApp() {
   val context = LocalContext.current
   val liveHierarchy = remember { mutableStateOf<String?>(null) }
 
@@ -74,7 +76,7 @@ internal const val LIVE_HIERARCHY_TEST_TAG = "live-hierarchy"
     Column(
       modifier = Modifier.padding(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.spacedBy(16.dp)
+      verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
       RadiographyLogo(Modifier.height(128.dp))
 
@@ -83,14 +85,14 @@ internal const val LIVE_HIERARCHY_TEST_TAG = "live-hierarchy"
         onValueChange = { username = it },
         label = { Text("Username") },
         colors = TextFieldDefaults.outlinedTextFieldColors(),
-        modifier = Modifier.testTag(TEXT_FIELD_TEST_TAG)
+        modifier = Modifier.testTag(TEXT_FIELD_TEST_TAG),
       )
       TextField(
         value = password,
         onValueChange = { password = it },
         label = { Text("Password") },
         colors = TextFieldDefaults.outlinedTextFieldColors(),
-        visualTransformation = PasswordVisualTransformation()
+        visualTransformation = PasswordVisualTransformation(),
       )
       Row(verticalAlignment = Alignment.CenterVertically) {
         Checkbox(checked = rememberMe, onCheckedChange = { rememberMe = it })
@@ -99,12 +101,8 @@ internal const val LIVE_HIERARCHY_TEST_TAG = "live-hierarchy"
       }
 
       Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        TextButton(onClick = {}) {
-          Text("SIGN IN")
-        }
-        TextButton(onClick = {}) {
-          Text("FORGOT PASSWORD")
-        }
+        TextButton(onClick = {}) { Text("SIGN IN") }
+        TextButton(onClick = {}) { Text("FORGOT PASSWORD") }
       }
 
       // Include a classic Android view in the composition.
@@ -114,18 +112,14 @@ internal const val LIVE_HIERARCHY_TEST_TAG = "live-hierarchy"
       }
 
       liveHierarchy.value?.let {
-        Row(
-          modifier = Modifier
-            .horizontalScroll(rememberScrollState())
-            .weight(1f)
-        ) {
+        Row(modifier = Modifier.horizontalScroll(rememberScrollState()).weight(1f)) {
           Column(Modifier.verticalScroll(rememberScrollState())) {
             Text(
               liveHierarchy.value.orEmpty(),
               fontFamily = FontFamily.Monospace,
               fontSize = 6.sp,
               lineHeight = 1.2.em,
-              modifier = Modifier.testTag(LIVE_HIERARCHY_TEST_TAG)
+              modifier = Modifier.testTag(LIVE_HIERARCHY_TEST_TAG),
             )
           }
         }
@@ -135,11 +129,12 @@ internal const val LIVE_HIERARCHY_TEST_TAG = "live-hierarchy"
       }
 
       SideEffect {
-        liveHierarchy.value = Radiography.scan(
-          viewStateRenderers = DefaultsIncludingPii,
-          // Don't trigger infinite recursion.
-          viewFilter = skipComposeTestTagsFilter(LIVE_HIERARCHY_TEST_TAG)
-        )
+        liveHierarchy.value =
+          Radiography.scan(
+            viewStateRenderers = DefaultsIncludingPii,
+            // Don't trigger infinite recursion.
+            viewFilter = skipComposeTestTagsFilter(LIVE_HIERARCHY_TEST_TAG),
+          )
       }
     }
   }
@@ -147,69 +142,66 @@ internal const val LIVE_HIERARCHY_TEST_TAG = "live-hierarchy"
 
 @OptIn(ExperimentalRadiographyComposeApi::class)
 private fun showSelectionDialog(context: Context) {
-  val renderings = listOf(
-    "Default" to {
-      Radiography.scan()
-    },
-    "Focused window" to {
-      Radiography.scan(scanScope = FocusedWindowScope)
-    },
-    "Skip testTag(\"$TEXT_FIELD_TEST_TAG\")" to {
-      Radiography.scan(viewFilter = skipComposeTestTagsFilter(TEXT_FIELD_TEST_TAG))
-    },
-    "Focused window and custom filter" to {
-      Radiography.scan(
-        scanScope = FocusedWindowScope,
-        viewFilter = { view ->
-          (view as? ScannableView.AndroidView)?.view !is LinearLayout }
-      )
-    },
-    "Include PII" to {
-      Radiography.scan(viewStateRenderers = DefaultsIncludingPii)
-    },
-    "Include PII ellipsized" to {
-      Radiography.scan(
-        viewStateRenderers = listOf(
-          ViewRenderer,
-          textViewRenderer(renderTextValue = true, textValueMaxLength = 4),
-          CheckableRenderer,
-        )
-      )
-    },
-    "Custom LinearLayout renderer" to {
-      Radiography.scan(
-        viewStateRenderers = DefaultsNoPii + androidViewStateRendererFor<LinearLayout> {
-          append(if (it.orientation == LinearLayout.HORIZONTAL) "horizontal" else "vertical")
-        })
-    }
-  )
+  val renderings =
+    listOf(
+      "Default" to { Radiography.scan() },
+      "Focused window" to { Radiography.scan(scanScope = FocusedWindowScope) },
+      "Skip testTag(\"$TEXT_FIELD_TEST_TAG\")" to
+        {
+          Radiography.scan(viewFilter = skipComposeTestTagsFilter(TEXT_FIELD_TEST_TAG))
+        },
+      "Focused window and custom filter" to
+        {
+          Radiography.scan(
+            scanScope = FocusedWindowScope,
+            viewFilter = { view -> (view as? ScannableView.AndroidView)?.view !is LinearLayout },
+          )
+        },
+      "Include PII" to { Radiography.scan(viewStateRenderers = DefaultsIncludingPii) },
+      "Include PII ellipsized" to
+        {
+          Radiography.scan(
+            viewStateRenderers =
+              listOf(
+                ViewRenderer,
+                textViewRenderer(renderTextValue = true, textValueMaxLength = 4),
+                CheckableRenderer,
+              )
+          )
+        },
+      "Custom LinearLayout renderer" to
+        {
+          Radiography.scan(
+            viewStateRenderers =
+              DefaultsNoPii +
+                androidViewStateRendererFor<LinearLayout> {
+                  append(
+                    if (it.orientation == LinearLayout.HORIZONTAL) "horizontal" else "vertical"
+                  )
+                }
+          )
+        },
+    )
 
-  val items = renderings.map { it.first }
-    .toTypedArray()
+  val items = renderings.map { it.first }.toTypedArray()
   Builder(context)
     .setTitle("Choose rendering")
     .setItems(items) { _, index ->
       val rendering = renderings[index].second()
       // Print each line as a separate logcat entry so the total output doesn't get truncated.
-      rendering.lineSequence().forEach {
-        Log.d("MainActivity", it)
-      }
+      rendering.lineSequence().forEach { Log.d("MainActivity", it) }
       showResult(context, rendering)
     }
     .show()
 }
 
-private fun showResult(
-  context: Context,
-  rendering: String
-) {
-  val renderingDialog = Builder(context)
-    .setTitle("Rendering (also printed to Logcat)")
-    .setMessage(rendering)
-    .setPositiveButton("Ok") { _, _ ->
-      showSelectionDialog(context)
-    }
-    .show()
+private fun showResult(context: Context, rendering: String) {
+  val renderingDialog =
+    Builder(context)
+      .setTitle("Rendering (also printed to Logcat)")
+      .setMessage(rendering)
+      .setPositiveButton("Ok") { _, _ -> showSelectionDialog(context) }
+      .show()
   val messageView = renderingDialog.findViewById<TextView>(android.R.id.message)!!
   messageView.textSize = 9f
   messageView.typeface = Typeface.MONOSPACE

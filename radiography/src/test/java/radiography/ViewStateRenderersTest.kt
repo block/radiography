@@ -17,36 +17,30 @@ import radiography.ViewStateRenderers.appendTextValue
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 internal class ViewStateRenderersTest {
-  @Suppress("DEPRECATION")
-  private val context: Context = RuntimeEnvironment.application
+  @Suppress("DEPRECATION") private val context: Context = RuntimeEnvironment.application
 
-  @Test fun `androidViewStateRendererFor ignores different view types`() {
+  @Test
+  fun `androidViewStateRendererFor ignores different view types`() {
     var rendered = false
-    val renderer = androidViewStateRendererFor<TextView> {
-      rendered = true
-    }
+    val renderer = androidViewStateRendererFor<TextView> { rendered = true }
 
-    with(renderer) {
-      AttributeAppendable(StringBuilder()).render(AndroidView(View(context)))
-    }
+    with(renderer) { AttributeAppendable(StringBuilder()).render(AndroidView(View(context))) }
 
     assertThat(rendered).isFalse()
   }
 
-  @Test fun `androidViewStateRendererFor accepts view subtypes`() {
+  @Test
+  fun `androidViewStateRendererFor accepts view subtypes`() {
     var rendered = false
-    val renderer = androidViewStateRendererFor<TextView> {
-      rendered = true
-    }
+    val renderer = androidViewStateRendererFor<TextView> { rendered = true }
 
-    with(renderer) {
-      AttributeAppendable(StringBuilder()).render(AndroidView(EditText(context)))
-    }
+    with(renderer) { AttributeAppendable(StringBuilder()).render(AndroidView(EditText(context))) }
 
     assertThat(rendered).isTrue()
   }
 
-  @Test fun `appendTextValue with text over max length`() {
+  @Test
+  fun `appendTextValue with text over max length`() {
     val text = "hello world"
 
     val result = buildString {
@@ -57,7 +51,8 @@ internal class ViewStateRenderersTest {
     assertThat(result).isEqualTo("""text:"hell…", text-length:11""")
   }
 
-  @Test fun `appendTextValue with text exactly max length`() {
+  @Test
+  fun `appendTextValue with text exactly max length`() {
     val text = "hello world"
 
     val result = buildString {
@@ -68,7 +63,8 @@ internal class ViewStateRenderersTest {
     assertThat(result).isEqualTo("""text:"hello world"""")
   }
 
-  @Test fun `appendTextValue with text under max length`() {
+  @Test
+  fun `appendTextValue with text under max length`() {
     val text = "hello world"
 
     val result = buildString {
@@ -79,7 +75,8 @@ internal class ViewStateRenderersTest {
     assertThat(result).isEqualTo("""text:"hello world"""")
   }
 
-  @Test fun `appendTextValue with no text`() {
+  @Test
+  fun `appendTextValue with no text`() {
     val text = "hello world"
 
     val result = buildString {

@@ -21,18 +21,13 @@ import radiography.ViewStateRenderers
 /**
  * A Stoic plugin that prints the view hierarchy using Radiography.
  *
- * Usage:
- *   stoic radiography.apk
+ * Usage: stoic radiography.apk
  *
- * Options:
- *   --pii          Include PII (personally identifiable information) like text content
- *   --focused      Scan only the focused window instead of all windows
+ * Options: --pii Include PII (personally identifiable information) like text content --focused Scan
+ * only the focused window instead of all windows
  *
- * Examples:
- *   stoic radiography.apk
- *   stoic radiography.apk --pii
- *   stoic radiography.apk --focused
- *   stoic radiography.apk --pii --focused
+ * Examples: stoic radiography.apk stoic radiography.apk --pii stoic radiography.apk --focused stoic
+ * radiography.apk --pii --focused
  */
 fun main(args: Array<String>) {
   // Validate arguments
@@ -44,7 +39,9 @@ fun main(args: Array<String>) {
     System.err.println("Usage: stoic radiography.apk [OPTIONS]")
     System.err.println()
     System.err.println("Options:")
-    System.err.println("  --pii       Include PII (personally identifiable information) like text content")
+    System.err.println(
+      "  --pii       Include PII (personally identifiable information) like text content"
+    )
     System.err.println("  --focused   Scan only the focused window instead of all windows")
     kotlin.system.exitProcess(1)
   }
@@ -68,22 +65,22 @@ fun main(args: Array<String>) {
 
   try {
     runOnMainLooper {
-      val viewStateRenderers = if (includePii) {
-        ViewStateRenderers.DefaultsIncludingPii
-      } else {
-        ViewStateRenderers.DefaultsNoPii
-      }
+      val viewStateRenderers =
+        if (includePii) {
+          ViewStateRenderers.DefaultsIncludingPii
+        } else {
+          ViewStateRenderers.DefaultsNoPii
+        }
 
-      val scanScope = if (focusedOnly) {
-        ScanScopes.FocusedWindowScope
-      } else {
-        ScanScopes.AllWindowsScope
-      }
+      val scanScope =
+        if (focusedOnly) {
+          ScanScopes.FocusedWindowScope
+        } else {
+          ScanScopes.AllWindowsScope
+        }
 
-      val hierarchy = Radiography.scan(
-        scanScope = scanScope,
-        viewStateRenderers = viewStateRenderers
-      )
+      val hierarchy =
+        Radiography.scan(scanScope = scanScope, viewStateRenderers = viewStateRenderers)
 
       println(hierarchy)
     }

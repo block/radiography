@@ -53,17 +53,13 @@ tasks.register<Tar>("dist") {
 
   into("radiography-stoic-plugin") {
     // Include the APK
-    from("${layout.buildDirectory.get()}/outputs/apk/debug") {
-      include("stoic-plugin-debug.apk")
-    }
+    from("${layout.buildDirectory.get()}/outputs/apk/debug") { include("stoic-plugin-debug.apk") }
 
     // Include the wrapper script and README from prebuilt
     from("$projectDir/prebuilt") {
       include("radiography")
       include("README.md")
-      filePermissions {
-        unix("rwxr-xr-x")
-      }
+      filePermissions { unix("rwxr-xr-x") }
     }
   }
 
@@ -71,6 +67,4 @@ tasks.register<Tar>("dist") {
 }
 
 // Convenience alias
-tasks.register("distribution") {
-  dependsOn("dist")
-}
+tasks.register("distribution") { dependsOn("dist") }

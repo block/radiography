@@ -1,8 +1,6 @@
 package radiography
 
-public class AttributeAppendable(
-  private val stringBuilder: StringBuilder
-) {
+public class AttributeAppendable(private val stringBuilder: StringBuilder) {
 
   private var first = true
 

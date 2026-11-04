@@ -26,12 +26,7 @@ android {
     compose = true
   }
 
-  packaging {
-    resources.excludes += listOf(
-      "META-INF/AL2.0",
-      "META-INF/LGPL2.1",
-    )
-  }
+  packaging { resources.excludes += listOf("META-INF/AL2.0", "META-INF/LGPL2.1") }
   namespace = "com.squareup.radiography.test.compose.empty"
   testNamespace = "com.squareup.radiography.test.compose"
 }
@@ -39,9 +34,7 @@ android {
 tasks.withType<KotlinCompile> {
   compilerOptions {
     jvmTarget.set(JvmTarget.JVM_1_8)
-    freeCompilerArgs.addAll(
-      "-opt-in=kotlin.RequiresOptIn"
-    )
+    freeCompilerArgs.addAll("-opt-in=kotlin.RequiresOptIn")
   }
 }
 

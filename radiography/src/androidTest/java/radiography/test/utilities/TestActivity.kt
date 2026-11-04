@@ -19,13 +19,9 @@ class TestActivity : Activity() {
   }
 
   companion object {
-    val intent = Intent(
-      InstrumentationRegistry.getInstrumentation().targetContext,
-      TestActivity::class.java
-    )
+    val intent =
+      Intent(InstrumentationRegistry.getInstrumentation().targetContext, TestActivity::class.java)
 
-    fun Intent.withTextViewText(text: String): Intent = apply {
-      putExtra("textViewText", text)
-    }
+    fun Intent.withTextViewText(text: String): Intent = apply { putExtra("textViewText", text) }
   }
 }

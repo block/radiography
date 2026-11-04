@@ -33,8 +33,8 @@ android {
     applicationId = "com.squareup.radiography.sample"
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
-    namespace = "com.squareup.radiography.sample"
-    testNamespace = "com.squareup.radiography.sample.test"
+  namespace = "com.squareup.radiography.sample"
+  testNamespace = "com.squareup.radiography.sample.test"
 }
 
 dependencies {

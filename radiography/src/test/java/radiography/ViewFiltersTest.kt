@@ -16,27 +16,30 @@ import radiography.ViewFilters.androidViewFilterFor
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 internal class ViewFiltersTest {
-  @Suppress("DEPRECATION")
-  private val context: Context = RuntimeEnvironment.application
+  @Suppress("DEPRECATION") private val context: Context = RuntimeEnvironment.application
 
-  @Test fun `androidViewFilterFor ignores different view types`() {
+  @Test
+  fun `androidViewFilterFor ignores different view types`() {
     var filterRan = false
-    val filter = androidViewFilterFor<TextView> {
-      filterRan = true
-      false
-    }
+    val filter =
+      androidViewFilterFor<TextView> {
+        filterRan = true
+        false
+      }
 
     filter.matches(AndroidView(View(context)))
 
     assertThat(filterRan).isFalse()
   }
 
-  @Test fun `androidViewFilterFor accepts view subtypes`() {
+  @Test
+  fun `androidViewFilterFor accepts view subtypes`() {
     var filterRan = false
-    val filter = androidViewFilterFor<TextView> {
-      filterRan = true
-      false
-    }
+    val filter =
+      androidViewFilterFor<TextView> {
+        filterRan = true
+        false
+      }
 
     filter.matches(AndroidView(EditText(context)))
 
