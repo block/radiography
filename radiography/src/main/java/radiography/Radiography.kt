@@ -51,7 +51,7 @@ public object Radiography {
         return@buildString
       }
 
-    roots.forEach { scanRoot ->
+    for (scanRoot in roots) {
       // The entire view tree is single threaded, and that's typically the main thread, but
       // it doesn't have to be, and we don't know where the passed in view is coming from.
       val viewLooper = (scanRoot as? AndroidView)?.view?.handler?.looper ?: Looper.getMainLooper()!!
