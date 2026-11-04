@@ -19,9 +19,9 @@ private class ComposerVariantConstants(
 private fun tryLoadVariant(composerClassName: String): ComposerVariantConstants? {
   return try {
     val contextHolderClass =
-      Class.forName($$"$$composerClassName$CompositionContextHolder")
+      Class.forName("$composerClassName\$CompositionContextHolder")
     val contextImplClass =
-      Class.forName($$"$$composerClassName$CompositionContextImpl")
+      Class.forName("$composerClassName\$CompositionContextImpl")
     val refField = contextHolderClass.getDeclaredField("ref")
       .apply { isAccessible = true }
     val composersField = contextImplClass.getDeclaredField("composers")
