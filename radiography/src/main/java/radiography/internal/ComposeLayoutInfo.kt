@@ -286,7 +286,7 @@ private fun sortSubcompositionsByChildOrder(
 }
 
 private val GET_CHILDREN_METHOD: Method by lazy {
-  Class.forName("androidx.compose.ui.node.LayoutNode").getMethod($$"getChildren$ui")
+  Class.forName("androidx.compose.ui.node.LayoutNode").getMethod("getChildren\$ui")
 }
 
 @Suppress("UNCHECKED_CAST")
