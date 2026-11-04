@@ -22,45 +22,38 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import com.google.common.truth.Truth.assertThat
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import org.junit.Rule
 import org.junit.Test
 import radiography.ExperimentalRadiographyComposeApi
 import radiography.ScannableView
 import radiography.ScannableView.AndroidView
 import radiography.ScannableView.ComposeView
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalRadiographyComposeApi::class)
 class ComposeViewTest {
 
-  @get:Rule
-  val composeRule = createAndroidComposeRule<ComponentActivity>()
+  @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()
 
   @Test
   fun androidView_children_includes_ComposeViews() {
-    composeRule.setContentWithExplicitRoot {
-      BasicText("hello")
-    }
+    composeRule.setContentWithExplicitRoot { BasicText("hello") }
 
-    val textComposable = findRootComposeView().allDescendentsDepthFirst
-      .single { it.displayName == "BasicText" }
+    val textComposable =
+      findRootComposeView().allDescendentsDepthFirst.single { it.displayName == "BasicText" }
     assertThat(textComposable.children.asIterable()).isEmpty()
   }
 
   @Test
   fun composeView_children_includes_AndroidView() {
     composeRule.setContentWithExplicitRoot {
-      Column {
-        androidx.compose.ui.viewinterop.AndroidView(::TextView)
-      }
+      Column { androidx.compose.ui.viewinterop.AndroidView(::TextView) }
     }
 
-    val columnView = findRootComposeView().allDescendentsDepthFirst
-      .single { it.displayName == "Column" }
-    val androidViews = columnView.allDescendentsDepthFirst
-      .filterIsInstance<AndroidView>()
-      .toList()
+    val columnView =
+      findRootComposeView().allDescendentsDepthFirst.single { it.displayName == "Column" }
+    val androidViews = columnView.allDescendentsDepthFirst.filterIsInstance<AndroidView>().toList()
     assertThat(androidViews.count { it.view is TextView }).isEqualTo(1)
   }
 
@@ -69,15 +62,12 @@ class ComposeViewTest {
     composeRule.setContentWithExplicitRoot {
       Column {
         BasicText("hello")
-        Button(onClick = {}) {
-          Box(Modifier)
-        }
+        Button(onClick = {}) { Box(Modifier) }
       }
     }
 
-    val columnView = findRootComposeView()
-      .allDescendentsDepthFirst
-      .first { it.displayName == "Column" }
+    val columnView =
+      findRootComposeView().allDescendentsDepthFirst.first { it.displayName == "Column" }
     val columnChildren = columnView.children.toList()
     assertThat(columnChildren).hasSize(2)
     assertThat(columnChildren[0].displayName).isEqualTo("BasicText")
@@ -88,12 +78,11 @@ class ComposeViewTest {
 
   @Test
   fun composeView_reports_LayoutModifiers() {
-    composeRule.setContentWithExplicitRoot {
-      Box(TestModifier)
-    }
+    composeRule.setContentWithExplicitRoot { Box(TestModifier) }
 
     val boxView =
-      findRootComposeView().allDescendentsDepthFirst.single { it.displayName == "Box" } as ComposeView
+      findRootComposeView().allDescendentsDepthFirst.single { it.displayName == "Box" }
+        as ComposeView
     assertThat(boxView.modifiers).contains(TestModifier)
   }
 
@@ -105,14 +94,12 @@ class ComposeViewTest {
       Box(Modifier.size(30.dp, 40.dp))
     }
 
-    val (widthPx, heightPx) = composeRule.runOnIdle {
-      with(density!!) {
-        Pair(30.dp.roundToPx(), 40.dp.roundToPx())
-      }
-    }
+    val (widthPx, heightPx) =
+      composeRule.runOnIdle { with(density!!) { Pair(30.dp.roundToPx(), 40.dp.roundToPx()) } }
 
     val boxView =
-      findRootComposeView().allDescendentsDepthFirst.single { it.displayName == "Box" } as ComposeView
+      findRootComposeView().allDescendentsDepthFirst.single { it.displayName == "Box" }
+        as ComposeView
     assertThat(boxView.width).isEqualTo(widthPx)
     assertThat(boxView.height).isEqualTo(heightPx)
   }
@@ -121,24 +108,25 @@ class ComposeViewTest {
   fun composeView_inherits_name_of_top_most_call() {
     renderCallChainUI()
 
-    val columnView = findRootComposeView()
-      .allDescendentsDepthFirst
-      .first { it.displayName == "Column" }
+    val columnView =
+      findRootComposeView().allDescendentsDepthFirst.first { it.displayName == "Column" }
 
     val columnChildren = columnView.children.toList()
     assertThat(columnChildren).hasSize(1)
 
     // Expect that the chain of custom Call functions is collapsed, so that the BasicText
-    // is represented with the name "Call3" but contains the semantic information of the text "hello".
+    // is represented with the name "Call3" but contains the semantic information of the text
+    // "hello".
     val callGroup = columnChildren[0] as ComposeView
-    assertThat(callGroup.children.count())
-      .isEqualTo(0)
+    assertThat(callGroup.children.count()).isEqualTo(0)
 
-    assertThat(callGroup.displayName)
-      .isEqualTo("Call1")
+    assertThat(callGroup.displayName).isEqualTo("Call1")
 
-    assertThat(callGroup.semanticsConfigurations.firstNotNullOfOrNull { it[SemanticsProperties.Text] }
-      ?.map { it.toString() })
+    assertThat(
+        callGroup.semanticsConfigurations
+          .firstNotNullOfOrNull { it[SemanticsProperties.Text] }
+          ?.map { it.toString() }
+      )
       .containsExactly("hello")
   }
 
@@ -147,14 +135,12 @@ class ComposeViewTest {
   fun composeView_reports_call_chain_info() {
     renderCallChainUI()
 
-    val columnView = findRootComposeView()
-      .allDescendentsDepthFirst
-      .first { it.displayName == "Column" }
+    val columnView =
+      findRootComposeView().allDescendentsDepthFirst.first { it.displayName == "Column" }
 
     val callGroup = columnView.children.first() as ComposeView
 
-    assertThat(callGroup.callChain)
-      .hasSize(6)
+    assertThat(callGroup.callChain).hasSize(6)
 
     assertThat(callGroup.callChain.map { it.name })
       .containsExactly("Call1", "Call2", "Call3", "BasicText", "Layout", "ReusableComposeNode")
@@ -166,13 +152,12 @@ class ComposeViewTest {
         "ComposeViewTest.kt",
         "ComposeViewTest.kt",
         "BasicText.kt",
-        "Layout.kt"
+        "Layout.kt",
       )
   }
 
   private fun renderCallChainUI() {
     composeRule.setContentWithExplicitRoot {
-
       @Composable
       fun Call3() {
         BasicText(text = "hello")
@@ -188,23 +173,19 @@ class ComposeViewTest {
         Call2()
       }
 
-      Column {
-        Call1()
-      }
+      Column { Call1() }
     }
   }
 
   private object TestModifier : LayoutModifier {
     override fun MeasureScope.measure(
       measurable: Measurable,
-      constraints: Constraints
+      constraints: Constraints,
     ): MeasureResult = layout(1, 2) {}
   }
 
   private fun findRootComposeView(): ComposeView =
-    findRootAndroidView().allDescendentsDepthFirst
-      .filterIsInstance<ComposeView>()
-      .first()
+    findRootAndroidView().allDescendentsDepthFirst.filterIsInstance<ComposeView>().first()
 
   private fun findRootAndroidView(): AndroidView {
     val latch = CountDownLatch(1)

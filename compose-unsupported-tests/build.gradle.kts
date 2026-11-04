@@ -26,22 +26,15 @@ android {
     compose = true
   }
 
-  packaging {
-    resources.excludes += listOf(
-      "META-INF/AL2.0",
-      "META-INF/LGPL2.1"
-    )
-  }
-    namespace = "com.squareup.radiography.test.compose.unsupported.empty"
-    testNamespace = "com.squareup.radiography.test.compose.unsupported"
+  packaging { resources.excludes += listOf("META-INF/AL2.0", "META-INF/LGPL2.1") }
+  namespace = "com.squareup.radiography.test.compose.unsupported.empty"
+  testNamespace = "com.squareup.radiography.test.compose.unsupported"
 }
 
 tasks.withType<KotlinCompile> {
   compilerOptions {
     jvmTarget.set(JvmTarget.JVM_1_8)
-    freeCompilerArgs.addAll(
-      "-opt-in=kotlin.RequiresOptIn"
-    )
+    freeCompilerArgs.addAll("-opt-in=kotlin.RequiresOptIn")
   }
 }
 

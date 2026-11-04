@@ -7,12 +7,12 @@ import java.util.BitSet
  * art tree.
  *
  * @param renderNode A function which write the description of a node to a [StringBuilder], and
- * returns the node's children.
+ *   returns the node's children.
  */
 internal fun <N> renderTreeString(
   builder: StringBuilder,
   rootNode: N,
-  renderNode: StringBuilder.(N) -> List<N>
+  renderNode: StringBuilder.(N) -> List<N>,
 ) {
   renderRecursively(builder, rootNode, renderNode, depth = 0, lastChildMask = BitSet())
 }
@@ -22,7 +22,7 @@ private fun <N> renderRecursively(
   node: N,
   renderNode: StringBuilder.(N) -> List<N>,
   depth: Int,
-  lastChildMask: BitSet
+  lastChildMask: BitSet,
 ) {
   // Render node into a separate buffer so we can append a prefix to every line.
   val nodeDescription = StringBuilder()
@@ -41,9 +41,7 @@ private fun <N> renderRecursively(
       lastChildMask.set(depth)
     }
 
-    childNode?.let {
-      renderRecursively(builder, childNode, renderNode, depth + 1, lastChildMask)
-    }
+    childNode?.let { renderRecursively(builder, childNode, renderNode, depth + 1, lastChildMask) }
   }
 
   // Unset the bit we set above before returning.
@@ -53,7 +51,7 @@ private fun <N> renderRecursively(
 private fun StringBuilder.appendLinePrefix(
   depth: Int,
   continuePreviousLine: Boolean,
-  lastChildMask: BitSet
+  lastChildMask: BitSet,
 ) {
   val lastDepth = depth - 1
   // Add a non-breaking space at the beginning of the line because Logcat eats normal spaces.

@@ -35,15 +35,11 @@ android {
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
 
-  buildFeatures {
-    buildConfig = false
-  }
+  buildFeatures { buildConfig = false }
 
-  testOptions {
-    execution = "ANDROIDX_TEST_ORCHESTRATOR"
-  }
-    namespace = "com.squareup.radiography"
-    testNamespace = "com.squareup.radiography.test"
+  testOptions { execution = "ANDROIDX_TEST_ORCHESTRATOR" }
+  namespace = "com.squareup.radiography"
+  testNamespace = "com.squareup.radiography.test"
 }
 
 tasks.withType<KotlinCompile> {
@@ -55,10 +51,11 @@ tasks.withType<KotlinCompile> {
         // Require explicit public modifiers and types.
         // TODO this should be moved to a top-level `kotlin { explicitApi() }` once that's working
         //  for android projects, see https://youtrack.jetbrains.com/issue/KT-37652.
-        "-Xexplicit-api=strict".takeUnless {
-          // Tests aren't part of the public API, don't turn explicit API mode on for them.
-          name.contains("test", ignoreCase = true)
-        }
+        "-Xexplicit-api=strict"
+          .takeUnless {
+            // Tests aren't part of the public API, don't turn explicit API mode on for them.
+            name.contains("test", ignoreCase = true)
+          },
       )
     )
   }

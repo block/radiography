@@ -1,6 +1,12 @@
-# Make ktlint respect our style guide's indentation.
+# Kotlin settings matching ktfmt's Google style, so the IDE formats the same way ktfmt does.
+# See https://github.com/facebook/ktfmt/blob/main/docs/editorconfig/.editorconfig-google
 [*.{kt,kts}]
-# See https://github.com/square/radiography/issues/67.
-# indent_size = 2
-# continuation_indent_size = 4
-indent_size = unset
+indent_size = 2
+continuation_indent_size = 4
+max_line_length = 100
+ij_kotlin_allow_trailing_comma = true
+ij_kotlin_allow_trailing_comma_on_call_site = true
+ij_kotlin_imports_layout = *
+ij_kotlin_name_count_to_use_star_import = 2147483647
+ij_kotlin_name_count_to_use_star_import_for_members = 2147483647
+ij_kotlin_packages_to_use_import_on_demand = unset

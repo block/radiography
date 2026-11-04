@@ -22,26 +22,17 @@ android {
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
 
-  buildFeatures {
-    compose = true
-  }
+  buildFeatures { compose = true }
 
-  packaging {
-    resources.excludes += listOf(
-      "META-INF/AL2.0",
-      "META-INF/LGPL2.1"
-    )
-  }
-    namespace = "com.squareup.radiography.sample.compose"
-    testNamespace = "com.squareup.radiography.sample.compose.test"
+  packaging { resources.excludes += listOf("META-INF/AL2.0", "META-INF/LGPL2.1") }
+  namespace = "com.squareup.radiography.sample.compose"
+  testNamespace = "com.squareup.radiography.sample.compose.test"
 }
 
 tasks.withType<KotlinCompile> {
   compilerOptions {
     jvmTarget.set(JvmTarget.JVM_1_8)
-    freeCompilerArgs.addAll(
-      "-opt-in=kotlin.RequiresOptIn"
-    )
+    freeCompilerArgs.addAll("-opt-in=kotlin.RequiresOptIn")
   }
 }
 

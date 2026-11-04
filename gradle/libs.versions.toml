@@ -19,7 +19,7 @@ build-android = "com.android.tools.build:gradle:8.13.2"
 build-mavenPublish = "com.vanniktech:gradle-maven-publish-plugin:0.36.0"
 build-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 build-compose-compiler = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
-build-ktlint = "org.jlleitschuh.gradle:ktlint-gradle:11.6.1"
+build-ktfmt = "com.ncorti.ktfmt.gradle:plugin:0.26.0"
 build-binaryCompatibility = "org.jetbrains.kotlinx:binary-compatibility-validator:0.16.3"
 build-dokka = "org.jetbrains.dokka:dokka-gradle-plugin:2.1.0"
 

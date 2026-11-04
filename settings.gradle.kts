@@ -21,5 +21,5 @@ include(
   ":radiography",
   ":sample",
   ":sample-compose",
-  ":stoic-plugin"
+  ":stoic-plugin",
 )

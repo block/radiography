@@ -12,12 +12,13 @@ internal object SemanticsPropertiesHelpers {
   val HideFromAccessibility: SemanticsPropertyKey<Unit>?
     get() {
       if (_HideFromAccessibility === UNINITIALIZED) {
-        _HideFromAccessibility = try {
-          SemanticsProperties.HideFromAccessibility
-        } catch (_: NoSuchMethodError) {
-          // Actual compose version is too old to have this property.
-          null
-        }
+        _HideFromAccessibility =
+          try {
+            SemanticsProperties.HideFromAccessibility
+          } catch (_: NoSuchMethodError) {
+            // Actual compose version is too old to have this property.
+            null
+          }
       }
 
       @Suppress("UNCHECKED_CAST")

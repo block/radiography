@@ -10,23 +10,22 @@ import radiography.ViewStateRenderers.DefaultsIncludingPii
 
 class ComposeUnsupportedTest {
 
-  @get:Rule
-  val composeRule = createComposeRule()
+  @get:Rule val composeRule = createComposeRule()
 
-  @Test fun when_composeVersionNotSupported_then_failsGracefully() {
-    composeRule.setContent {
-      BasicText("FooBar")
-    }
+  @Test
+  fun when_composeVersionNotSupported_then_failsGracefully() {
+    composeRule.setContent { BasicText("FooBar") }
 
     composeRule.runOnIdle {
       val hierarchy = Radiography.scan(viewStateRenderers = DefaultsIncludingPii)
       assertThat(hierarchy).doesNotContain("FooBar")
-      assertThat(hierarchy).contains(
-        "Composition was found, but either Compose Tooling artifact is missing or the Compose " +
-          "version is not supported. Please ensure you have a dependency on " +
-          "androidx.ui:ui-tooling or check https://github.com/square/radiography for a new " +
-          "release."
-      )
+      assertThat(hierarchy)
+        .contains(
+          "Composition was found, but either Compose Tooling artifact is missing or the Compose " +
+            "version is not supported. Please ensure you have a dependency on " +
+            "androidx.ui:ui-tooling or check https://github.com/square/radiography for a new " +
+            "release."
+        )
     }
   }
 }

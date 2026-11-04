@@ -5,9 +5,9 @@ package radiography
  * scan.
  *
  * Some commons scopes are:
- *  - [ScanScopes.AllWindowsScope]
- *  - [ScanScopes.FocusedWindowScope]
- *  - [ScanScopes.singleViewScope]
+ * - [ScanScopes.AllWindowsScope]
+ * - [ScanScopes.FocusedWindowScope]
+ * - [ScanScopes.singleViewScope]
  */
 public fun interface ScanScope {
 
