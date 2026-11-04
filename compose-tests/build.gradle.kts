@@ -1,9 +1,5 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
   id("com.android.library")
-  kotlin("android")
   id("org.jetbrains.kotlin.plugin.compose")
 }
 
@@ -32,12 +28,7 @@ android {
   testNamespace = "com.squareup.radiography.test.compose"
 }
 
-tasks.withType<KotlinCompile> {
-  compilerOptions {
-    jvmTarget.set(JvmTarget.JVM_11)
-    freeCompilerArgs.addAll("-opt-in=kotlin.RequiresOptIn")
-  }
-}
+kotlin { compilerOptions { freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn") } }
 
 dependencies {
   androidTestImplementation(project(":radiography"))
