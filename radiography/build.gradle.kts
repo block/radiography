@@ -31,13 +31,15 @@ android {
 
   defaultConfig {
     minSdk = 23
-    targetSdk = 35
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
 
   buildFeatures { buildConfig = false }
 
-  testOptions { execution = "ANDROIDX_TEST_ORCHESTRATOR" }
+  testOptions {
+    execution = "ANDROIDX_TEST_ORCHESTRATOR"
+    targetSdk = 35
+  }
   namespace = "com.squareup.radiography"
   testNamespace = "com.squareup.radiography.test"
 }
