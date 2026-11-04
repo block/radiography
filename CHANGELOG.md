@@ -2,6 +2,16 @@ Change Log
 ==========
 
 
+Version 2.11
+------------
+
+_2026-11-04_
+
+* Upgrade Compose to 1.12.1 ([#196](https://github.com/block/radiography/pull/196), [#199](https://github.com/block/radiography/pull/199)).
+* Upgrade Kotlin to 2.4.21 ([#197](https://github.com/block/radiography/pull/197)).
+* Support the `GapComposer`, `LinkComposer`, and `RememberObserverHolder` internals introduced in newer Compose versions ([#196](https://github.com/block/radiography/pull/196)).
+* Subcompositions are now scanned in deterministic child placement order ([#196](https://github.com/block/radiography/pull/196)).
+
 Version 2.10
 ------------
 

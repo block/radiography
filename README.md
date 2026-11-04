@@ -30,7 +30,7 @@ Add the `radiography` dependency to your app's `build.gradle` file:
 
 ```gradle
 dependencies {
-  implementation 'com.squareup.radiography:radiography:2.10'
+  implementation 'com.squareup.radiography:radiography:2.11'
 }
 ```
 
