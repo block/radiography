@@ -5,7 +5,7 @@ androidx-test = "1.5.0"
 # We compile against an older version of Compose intentionally to support consumers that aren't on
 # the latest.
 #noinspection GradleDependency
-compose = "1.11.1"
+compose = "1.12.1"
 # Allows using a different version of Compose to validate that we degrade gracefully on apps
 # built with unsupported Compose versions.
 #noinspection GradleDependency
@@ -15,7 +15,7 @@ compose-sample = "1.6.8"
 
 [libraries]
 
-build-android = "com.android.tools.build:gradle:8.13.2"
+build-android = "com.android.tools.build:gradle:9.1.1"
 build-mavenPublish = "com.vanniktech:gradle-maven-publish-plugin:0.36.0"
 build-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 build-compose-compiler = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
