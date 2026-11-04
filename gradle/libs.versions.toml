@@ -1,6 +1,6 @@
 [versions]
 
-kotlin = "2.3.10"
+kotlin = "2.4.21"
 androidx-test = "1.5.0"
 # We compile against an older version of Compose intentionally to support consumers that aren't on
 # the latest.
